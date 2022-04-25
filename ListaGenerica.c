@@ -9,6 +9,18 @@ ListaGenerica *CriarLG() {
 }
 
 void DestruirLG(ListaGenerica *L, void (*func)(void *)) {
+    if (!L)return;
+    if (L->NEL > 0) {
+        while (L->Inicio) {
+            NOG *node = L->Inicio;
+            func(node->Info);
+            L->Inicio = node->Prox;
+            free(node);
+        }
+        free(L);
+    } else {
+        free(L);
+    }
 
 }
 

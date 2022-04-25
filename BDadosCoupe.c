@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include "BDadosCoupe.h"
 
+#define FIXED_SIZE_ARRAY 50
+
 /** \brief Criar_BDados: A) Criar a Base de dados
  *
  * \param nome_bd char* : Nome da Base de Dados
@@ -129,12 +131,29 @@ void Mostrar_Tabela(TABELA *T) {
 
 //H)	Mostrar toda a base de dados, deverá mostrar todas as Tabelas da BDados.
 void Mostrar_BDados(BDadosCoupe *BD) {
-    printf("---------Implementar funcao %s--------\n", __FUNCTION__);
+    if (!BD)return;
+    printf("--------Tabelas disponiveis na BD-----------\n");
+    ListaGenerica *head = (ListaGenerica *) BD->LTabelas;
+    NOG *node = head->Inicio;
+
+    while (node) {
+        TABELA *t = (TABELA *) node->Info;
+        Mostrar_Tabela(t);
+        printf("--------TABELA -----------\n");
+        node = node->Prox;
+    }
+
 }
 
 //I)	Libertar toda a memória alocada pela base de dados.
 void Destruir_BDados(BDadosCoupe *BD) {
-    printf("---------Implementar funcao %s--------\n", __FUNCTION__);
+    if (!BD)return;
+    if (BD->LTabelas->NEL > 0) {
+        printf("Implementar  funcao %s\n", __FUNCTION__);
+    } else {
+        printf("Destruindo  BD\n");
+        free(BD);
+    }
 }
 
 //J)	Memória ocupada por toda a base de dados.
@@ -143,25 +162,24 @@ long int Memoria_BDados(BDadosCoupe *BD) {
 }
 
 long int Memoria_Desperdicada_BDados(BDadosCoupe *BD) {
-    uint8_t fixed_array_size = 50;
     long int wasted_memory = 0;
     //Evaluate the memory used in BD head
-    wasted_memory += fixed_array_size - (strlen(BD->NOME_BDADOS) + 1);
-    wasted_memory += fixed_array_size - (strlen(BD->VERSAO_BDADOS) + 1);
+    wasted_memory += FIXED_SIZE_ARRAY - (strlen(BD->NOME_BDADOS) + 1);
+    wasted_memory += FIXED_SIZE_ARRAY - (strlen(BD->VERSAO_BDADOS) + 1);
     //Evaluate the memory in each ListTabelas - nome_tabela
     ListaGenerica *head = (ListaGenerica *) BD->LTabelas;
     //printf("A lista contem %d campos\n", head->NEL);
     NOG *node = head->Inicio;
     while (node) {
         TABELA *t = (TABELA *) node->Info;
-        wasted_memory += fixed_array_size - (strlen(t->NOME_TABELA) + 1);
+        wasted_memory += FIXED_SIZE_ARRAY - (strlen(t->NOME_TABELA) + 1);
         NOG *node_LCampos = t->LCampos->Inicio;
         while (node_LCampos) {
             //printf("looping node campo\n");
             CAMPO *c = (CAMPO *) node_LCampos->Info;
-            wasted_memory += fixed_array_size - (strlen(c->TIPO) + 1);
+            wasted_memory += FIXED_SIZE_ARRAY - (strlen(c->TIPO) + 1);
             //printf("Memoria do tipo da campo %s %d\t\t\n", c->TIPO, strlen(c->TIPO) + 1);
-            wasted_memory += fixed_array_size - (strlen(c->NOME_CAMPO) + 1);
+            wasted_memory += FIXED_SIZE_ARRAY - (strlen(c->NOME_CAMPO) + 1);
             //printf("Memoria do nome da campo %s %d\t\t\n", c->NOME_CAMPO, strlen(c->NOME_CAMPO) + 1);
             node_LCampos = node_LCampos->Prox;
         }
@@ -208,12 +226,51 @@ int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
 
 //L)	Apagar o conteúdo de uma Tabela. A Tabela continua a existir na BDados, mas não contém os dados, ou seja, os campos continuam, mas os registos são eliminados.
 int DELETE_TABLE_DATA(TABELA *T) {
-    return SUCESSO;
+    if (!T)return INSUCESSO;
+    if (T->LRegistos > 0) {
+        while (T->LRegistos->Inicio) {
+            NOG *node = T->LRegistos->Inicio;
+            free(node->Info);
+            T->LRegistos->Inicio = node->Prox;
+            free(node);
+            T->LRegistos->NEL--;
+        }
+        return SUCESSO;
+    }
+    return INSUCESSO;
 }
 
 //M)	Apagar o conteúdo de uma Tabela e remove a tabela da base de dados.
 int DROP_TABLE(BDadosCoupe *BD, char *nome_tabela) {
-    return SUCESSO;
+    if (!BD)return INSUCESSO;
+    if (strlen(nome_tabela) < 1)return INSUCESSO;
+
+    TABELA *t = Pesquisar_Tabela(BD, nome_tabela);
+
+    if (t) {
+        printf("Droping table %s\n",t->NOME_TABELA);
+        DELETE_TABLE_DATA(t);
+        free(t->LRegistos);
+        if (t->LCampos > 0) {
+            while (t->LCampos->Inicio) {
+                printf("xxxx");
+                NOG *node = t->LCampos->Inicio;
+                free(node->Info);
+                t->LCampos->Inicio = node->Prox;
+                free(node);
+                t->LCampos->NEL--;
+            }
+            printf("Lista campos %d",t->LCampos->NEL);
+            //todo - perceber pk este free da erro!
+           // printf("Lista campos %",t->LCampos->Inicio);
+            free(t->LCampos);
+            return SUCESSO;
+        }
+        free(t->LCampos);
+        free(t);
+        return SUCESSO;
+    }
+    return INSUCESSO;
 }
 
 //N)	Selecionar (Apresentar no ecran!) da base de dados todos os registos que obedeçam a uma dada condição, a função deve retornar o número de registos selecionados. (Ter em atenção o exemplo das aulas teóricas!). Nota: esta é certamente a funcionalidade mais usada num sistema de base de dados…, por isso se estiver bem otimizada…. O utilizador agradece!!!!
