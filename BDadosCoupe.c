@@ -149,11 +149,20 @@ void Mostrar_BDados(BDadosCoupe *BD) {
 void Destruir_BDados(BDadosCoupe *BD) {
     if (!BD)return;
     if (BD->LTabelas->NEL > 0) {
-        printf("Implementar  funcao %s\n", __FUNCTION__);
-    } else {
-        printf("Destruindo  BD\n");
-        free(BD);
+        NOG *n = BD->LTabelas->Inicio;
+        printf("%d\n", BD->LTabelas->NEL);
+        while (n) {
+            TABELA *t = n->Info;
+            printf("%s\n", t->NOME_TABELA);
+            DELETE_TABLE_DATA(t);
+            printf("%d\n", BD->LTabelas->NEL);
+            n = n->Prox;
+        }
     }
+    free(BD->LTabelas);
+    printf("Destruindo BD");
+    free(BD);
+
 }
 
 //J)	Memória ocupada por toda a base de dados.
@@ -162,6 +171,7 @@ long int Memoria_BDados(BDadosCoupe *BD) {
 }
 
 long int Memoria_Desperdicada_BDados(BDadosCoupe *BD) {
+    if (!BD) return -1;
     long int wasted_memory = 0;
     //Evaluate the memory used in BD head
     wasted_memory += FIXED_SIZE_ARRAY - (strlen(BD->NOME_BDADOS) + 1);
@@ -227,12 +237,15 @@ int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
 //L)	Apagar o conteúdo de uma Tabela. A Tabela continua a existir na BDados, mas não contém os dados, ou seja, os campos continuam, mas os registos são eliminados.
 int DELETE_TABLE_DATA(TABELA *T) {
     if (!T)return INSUCESSO;
-    if (T->LRegistos > 0) {
-        while (T->LRegistos->Inicio) {
-            NOG *node = T->LRegistos->Inicio;
-            free(node->Info);
-            T->LRegistos->Inicio = node->Prox;
-            free(node);
+    if (T->LRegistos->NEL > 0) {
+        NOG *node = T->LRegistos->Inicio;
+        while (node) {
+            printf("Removendo dados %s\n", node->Info);
+            NOG *aux = node;
+            free(aux->Info);
+            node = aux->Prox;
+            free(aux);
+
             T->LRegistos->NEL--;
         }
         return SUCESSO;
@@ -240,34 +253,80 @@ int DELETE_TABLE_DATA(TABELA *T) {
     return INSUCESSO;
 }
 
+
 //M)	Apagar o conteúdo de uma Tabela e remove a tabela da base de dados.
 int DROP_TABLE(BDadosCoupe *BD, char *nome_tabela) {
     if (!BD)return INSUCESSO;
     if (strlen(nome_tabela) < 1)return INSUCESSO;
 
     TABELA *t = Pesquisar_Tabela(BD, nome_tabela);
-
     if (t) {
-        printf("Droping table %s\n",t->NOME_TABELA);
+        printf("Droping table %s\n", t->NOME_TABELA);
+        //Only remove the data
         DELETE_TABLE_DATA(t);
-        free(t->LRegistos);
-        if (t->LCampos > 0) {
+        if (t->LCampos->NEL > 0) {
             while (t->LCampos->Inicio) {
-                printf("xxxx");
+                printf("Removendo campo %s\n", t->LCampos->Inicio->Info);
                 NOG *node = t->LCampos->Inicio;
-                free(node->Info);
+
+                free((CAMPO *) node->Info);
+
                 t->LCampos->Inicio = node->Prox;
                 free(node);
                 t->LCampos->NEL--;
             }
-            printf("Lista campos %d",t->LCampos->NEL);
+            printf("Lista campos %d\n", t->LCampos->NEL);
             //todo - perceber pk este free da erro!
-           // printf("Lista campos %",t->LCampos->Inicio);
+            // printf("Lista campos %",t->LCampos->Inicio);
             free(t->LCampos);
-            return SUCESSO;
+
+        } else {
+            free(t->LCampos);
         }
-        free(t->LCampos);
-        free(t);
+        printf("elementos %d:\n", BD->LTabelas->NEL);
+        //Remover tabela da lista Tabelas
+        if (BD->LTabelas->NEL <= 1) {
+            //Verificar se o unico elemento e o que procuramos
+            NOG *n = BD->LTabelas->Inicio;
+            printf("Tentando remover unico elemento\n");
+            TABELA *aux = BD->LTabelas->Inicio->Info;
+            if (strcmp(aux->NOME_TABELA, t->NOME_TABELA) == 0) {
+                printf("Removendo unico elemento\n");
+                free(aux);
+                free(n);
+                BD->LTabelas->NEL--;
+                return SUCESSO;
+            }
+        } else {
+            NOG *actual = BD->LTabelas->Inicio;
+            while (actual) {
+                NOG *next = actual->Prox;
+                TABELA *atualT = (TABELA *) actual->Info;
+
+
+                if (strcmp(atualT->NOME_TABELA, t->NOME_TABELA) == 0) {
+                    printf("Found %s\n", atualT->NOME_TABELA);
+
+                    //Nao existe um proximo
+                    if (next == NULL) {
+                        printf("matar");
+                        free(actual);
+                        BD->LTabelas->NEL--;
+                        return SUCESSO;
+                        //actual
+                    } else {
+                        printf("ccccccc");
+                        actual->Prox = next->Prox;
+                        free(actual);
+                        BD->LTabelas->NEL--;
+                        return SUCESSO;
+                    }
+
+                }
+                actual = actual->Prox;
+            }
+            return INSUCESSO;
+        }
         return SUCESSO;
     }
     return INSUCESSO;
