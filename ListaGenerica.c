@@ -9,18 +9,30 @@ ListaGenerica *CriarLG() {
 }
 
 void DestruirLG(ListaGenerica *L, void (*func)(void *)) {
-    if (!L)return;
-    if (L->NEL > 0) {
-        while (L->Inicio) {
-            NOG *node = L->Inicio;
-            func(node->Info);
-            L->Inicio = node->Prox;
-            free(node);
-        }
-        free(L);
-    } else {
-        free(L);
+    if (!L) return;
+    NOG *node = L->Inicio;
+    NOG *Aux = NULL;
+    while (node)
+    {
+        Aux = node->Prox;
+        func (node->Info);
+        free (node);
+        node = Aux;
     }
+    free(L);
+//    if (!L)return;
+//    if (L->NEL > 0) {
+//        while (L->Inicio) {
+//            NOG *node = L->Inicio;
+//            func(node->Info);
+//            L->Inicio = node->Prox;
+//            free(node);
+//        }
+//        free(L);
+//    } else {
+//        free(L);
+//    }
+
 
 }
 
@@ -31,6 +43,13 @@ void DestruirLG(ListaGenerica *L, void (*func)(void *)) {
  * @return  : SUCESSO or INSUCESSO
  */
 int AddLG(ListaGenerica *L, void *X) {
+//    if (!L) return INSUCESSO;
+//    NOG *node = (NOG *)malloc(sizeof(NOG));
+//    node->Info = X;
+//    node->Prox = L->Inicio;
+//    L->Inicio = node;
+//    L->NEL++;
+
     if (!L)return INSUCESSO;
     if (!X)return INSUCESSO;
     if (L->Inicio == NULL) {
@@ -63,10 +82,5 @@ void MostrarLG(ListaGenerica *L, void (*fshow)(void *)) {
     }
     //Passamos a lista para a funcao para tambem se conseguir ler o Nel da mesma.Util para desenhar a tabela
     fshow(L);
-//    NOG *n = L->Inicio;
-//    while (n) {
-//        //Execute the passed function on each node
-//        fshow(n->Info);
-//        n = n->Prox;
-//    }
+
 }

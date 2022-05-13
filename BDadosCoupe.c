@@ -58,6 +58,7 @@ int Add_Campo_Tabela(TABELA *T, char *nome_campo, char *tipo_campo) {
 
 //D)	Adicionar dados(registos) a uma tabela, os dados são dados numa string onde o separador é ‘;’m ex: Add_Valores_Tabela(T, “123;Joao;965654449”)
 int Add_Valores_Tabela(TABELA *T, char *dados) {
+    if (!T)return INSUCESSO;
     if (dados) {
         char *tmp = (char *) malloc(sizeof(strlen(dados) + 1));
         strcpy(tmp, dados);
@@ -103,6 +104,7 @@ TABELA *Pesquisar_Tabela(BDadosCoupe *BD, char *nome_tabela) {
         NOG *n = BD->LTabelas->Inicio;
         while (n) {
             TABELA *t = (TABELA *) n->Info;
+            // printf("%s\n",t->NOME_TABELA);
             if (strcmp(nome_tabela, t->NOME_TABELA) == 0)return t;
             n = n->Prox;
         }
@@ -125,24 +127,41 @@ void Mostrar_Tabela_NOME(BDadosCoupe *BD, char *tabela) {
 }
 
 void Mostrar_Tabela(TABELA *T) {
-    printf("Mostrando a tabela %s\n", T->NOME_TABELA);
-    printf("Desenhar no futuro ...\n");
+    if (!T) return;
+    printf("------------Tabela [%s]------------\n", T->NOME_TABELA);
+    NOG *n = T->LCampos->Inicio;
+    int fields_count = T->LCampos->NEL;
+    int pos = 0;
+    while (n) {
+        CAMPO *c = (CAMPO *) n->Info;
+        printf("[%s] (%s)\t", c->NOME_CAMPO, c->TIPO);
+        n = n->Prox;
+    }
+    printf("\n");
+    n = T->LRegistos->Inicio;
+    while (n) {
+        if (pos >= fields_count) {
+            printf("\n");
+            pos = 0;
+        }
+        printf("%s\t\t", n->Info);
+        pos++;
+        n = n->Prox;
+
+    }
+    printf("\n-----[A tabela contem %d registos]-----\n\n", T->LRegistos->NEL / T->LCampos->NEL);
 }
 
 //H)	Mostrar toda a base de dados, deverá mostrar todas as Tabelas da BDados.
 void Mostrar_BDados(BDadosCoupe *BD) {
     if (!BD)return;
-    printf("--------Tabelas disponiveis na BD-----------\n");
     ListaGenerica *head = (ListaGenerica *) BD->LTabelas;
     NOG *node = head->Inicio;
-
     while (node) {
         TABELA *t = (TABELA *) node->Info;
         Mostrar_Tabela(t);
-        printf("--------TABELA -----------\n");
         node = node->Prox;
     }
-
 }
 
 //I)	Libertar toda a memória alocada pela base de dados.
@@ -153,15 +172,17 @@ void Destruir_BDados(BDadosCoupe *BD) {
         printf("%d\n", BD->LTabelas->NEL);
         while (n) {
             TABELA *t = n->Info;
-            printf("%s\n", t->NOME_TABELA);
-            DELETE_TABLE_DATA(t);
-            printf("%d\n", BD->LTabelas->NEL);
+            printf(" Destruindo %s\n", t->NOME_TABELA);
+            DROP_TABLE(BD, t->NOME_TABELA);
             n = n->Prox;
         }
     }
     free(BD->LTabelas);
+    BD->LTabelas = NULL;
+    printf("%s\n", BD->NOME_BDADOS);
     printf("Destruindo BD");
     free(BD);
+
 
 }
 
@@ -215,15 +236,164 @@ long int Memoria_Desperdicada_BDados(BDadosCoupe *BD) {
 
 //K)	Exportar/Importar para/de Ficheiro (o retorno destas funções, permite saber se a função foi bem/mal-executada!):
 int Exportar_Tabela_BDados_Excel(BDadosCoupe *BD, char *tabela, char *ficheir_csv) {
-    return SUCESSO;
+    if (!BD) return -1;
+    if (!tabela) return -1;
+    if (!ficheir_csv) return -1;
+
+    //Check if table exists.
+    TABELA *found_table = Pesquisar_Tabela(BD, tabela);
+    if (found_table) {
+        int i = 0;
+        char extension[5] = ".csv";
+        char *file_name = NULL;
+        char *have_extension = strstr(ficheir_csv, ".csv");
+        //Handle file passed with extension or just file name
+        if (!have_extension) {
+            //Passed file has no extension.We add it for you :-)
+            file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
+            strcpy(file_name, ficheir_csv);
+            strcat(file_name, extension);
+        } else {
+            //Passed file has extension. All good to go :)
+            file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
+            strcpy(file_name, ficheir_csv);
+        }
+
+        FILE *ExpBD;
+        ExpBD = fopen(file_name, "w");
+        if (ExpBD) {
+            NOG *Aux = found_table->LCampos->Inicio;
+            while (Aux) {
+                fprintf(ExpBD, "%s;", Aux->Info);
+                Aux = Aux->Prox;
+            }
+            fprintf(ExpBD, "\n");
+            Aux = found_table->LRegistos->Inicio;
+            while (Aux) {
+                fprintf(ExpBD, "%s;", Aux->Info);
+                Aux = Aux->Prox;
+                i++;
+                if (i == found_table->LCampos->NEL) {
+                    fprintf(ExpBD, "\n");
+                    i = 0;
+                }
+            }
+            fprintf(ExpBD, "\n");
+            fclose(ExpBD);
+            free(file_name);
+            return SUCESSO;
+        }
+        free(file_name);
+        return INSUCESSO;
+    }
+    return INSUCESSO;
 }
 
+
 int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
-    return SUCESSO;
+    if (!BD) return -1;
+    if (!ficheir_csv) return -1;
+
+    int i = 0;
+    char extension[5] = ".csv";
+    char *file_name = NULL;
+    char *have_extension = strstr(ficheir_csv, ".csv");
+    //Handle file passed with extension or just file name
+    if (!have_extension) {
+        //Passed file has no extension.We add it for you :-)
+        printf("Nao tem  extensao\n");
+        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
+        strcpy(file_name, ficheir_csv);
+        strcat(file_name, extension);
+    } else {
+        //Passed file has extension. All good to go :)
+        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
+        strcpy(file_name, ficheir_csv);
+    }
+    FILE *ExpBD;
+    ExpBD = fopen(file_name, "w");
+    if (ExpBD) {
+        NOG *n = BD->LTabelas->Inicio;
+        fprintf(ExpBD, "%s\n", BD->NOME_BDADOS);
+        fprintf(ExpBD, "%s\n", BD->VERSAO_BDADOS);
+        fprintf(ExpBD, "%d\n", BD->LTabelas->NEL);
+        while (n) {
+            TABELA *t = (TABELA *) n->Info;
+            NOG *Aux = t->LCampos->Inicio;
+            fprintf(ExpBD, "%s\n", t->NOME_TABELA);
+            fprintf(ExpBD, "%d\n", t->LCampos->NEL);
+            while (Aux) {
+                fprintf(ExpBD, "%s;", Aux->Info);
+                Aux = Aux->Prox;
+            }
+            fprintf(ExpBD, "\n");
+            Aux = t->LRegistos->Inicio;
+            fprintf(ExpBD, "%d\n", t->LRegistos->NEL / t->LCampos->NEL);
+            while (Aux) {
+                fprintf(ExpBD, "%s;", Aux->Info);
+                Aux = Aux->Prox;
+                i++;
+                if (i == t->LCampos->NEL) {
+                    fprintf(ExpBD, "\n");
+                    i = 0;
+                }
+            }
+            n = n->Prox;
+            fprintf(ExpBD, "\n");
+
+        }
+        fclose(ExpBD);
+        free(file_name);
+        return SUCESSO;
+    }
+    free(file_name);
+    return INSUCESSO;
 }
 
 int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
-    return SUCESSO;
+    if (!BD) return INSUCESSO;
+    if (!ficheir_csv) return INSUCESSO;
+
+    int i = 0;
+    char extension[5] = ".csv";
+    char *file_name = NULL;
+    char *have_extension = strstr(ficheir_csv, ".csv");
+    //Handle file passed with extension or just file name
+    if (!have_extension) {
+        //Passed file has no extension.We add it for you :-)
+        printf("Nao tem  extensao\n");
+        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
+        strcpy(file_name, ficheir_csv);
+        strcat(file_name, extension);
+    } else {
+        //Passed file has extension. All good to go :)
+        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
+        strcpy(file_name, ficheir_csv);
+    }
+    FILE *ExpBD;
+
+    ExpBD = fopen(file_name, "r");
+    if (ExpBD) {
+        char teste[50];
+        char Buffer[20];
+        while (!feof(ExpBD)) {
+            fscanf(ExpBD, "%s\n", Buffer);
+
+            //printf("%s\n",Buffer);
+            fgets(teste, 100, ExpBD);
+
+            printf("%s", teste);
+
+
+        }
+        fclose(ExpBD);
+        return SUCESSO;
+
+    }
+    printf("Erro ao recriar BD via ficheiro!\n");
+    exit(-1);
+
+
 }
 
 int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
@@ -240,7 +410,7 @@ int DELETE_TABLE_DATA(TABELA *T) {
     if (T->LRegistos->NEL > 0) {
         NOG *node = T->LRegistos->Inicio;
         while (node) {
-            printf("Removendo dados %s\n", node->Info);
+            //printf("Removendo dados %s\n", node->Info);
             NOG *aux = node;
             free(aux->Info);
             node = aux->Prox;
@@ -253,6 +423,22 @@ int DELETE_TABLE_DATA(TABELA *T) {
     return INSUCESSO;
 }
 
+int DELETE_TABLE_FIELDS(TABELA *T) {
+    if (!T)return INSUCESSO;
+    if (T->LCampos->NEL > 0) {
+        NOG *node = T->LCampos->Inicio;
+        while (node) {
+            //printf("Removendo campos %s\n", node->Info);
+            NOG *aux = node;
+            free(aux->Info);
+            node = aux->Prox;
+            free(aux);
+            T->LCampos->NEL--;
+        }
+        return SUCESSO;
+    }
+    return INSUCESSO;
+}
 
 //M)	Apagar o conteúdo de uma Tabela e remove a tabela da base de dados.
 int DROP_TABLE(BDadosCoupe *BD, char *nome_tabela) {
@@ -262,71 +448,113 @@ int DROP_TABLE(BDadosCoupe *BD, char *nome_tabela) {
     TABELA *t = Pesquisar_Tabela(BD, nome_tabela);
     if (t) {
         printf("Droping table %s\n", t->NOME_TABELA);
-        //Only remove the data
-        DELETE_TABLE_DATA(t);
-        if (t->LCampos->NEL > 0) {
-            while (t->LCampos->Inicio) {
-                printf("Removendo campo %s\n", t->LCampos->Inicio->Info);
-                NOG *node = t->LCampos->Inicio;
 
-                free((CAMPO *) node->Info);
 
-                t->LCampos->Inicio = node->Prox;
-                free(node);
-                t->LCampos->NEL--;
+        NOG *P = BD->LTabelas->Inicio;
+        NOG *Ant = NULL;
+        int STOP = 0;
+        while (P && !STOP) {
+            if (P->Info == t) // if (func(P->Info, cc) == 1)
+            {
+                // Vou ter de remover o P
+                STOP = 1;
+            } else {
+                Ant = P;
+                P = P->Prox;
             }
-            printf("Lista campos %d\n", t->LCampos->NEL);
-            //todo - perceber pk este free da erro!
-            // printf("Lista campos %",t->LCampos->Inicio);
-            free(t->LCampos);
-
-        } else {
-            free(t->LCampos);
         }
-        printf("elementos %d:\n", BD->LTabelas->NEL);
-        //Remover tabela da lista Tabelas
-        if (BD->LTabelas->NEL <= 1) {
-            //Verificar se o unico elemento e o que procuramos
-            NOG *n = BD->LTabelas->Inicio;
-            printf("Tentando remover unico elemento\n");
-            TABELA *aux = BD->LTabelas->Inicio->Info;
-            if (strcmp(aux->NOME_TABELA, t->NOME_TABELA) == 0) {
-                printf("Removendo unico elemento\n");
-                free(aux);
-                free(n);
-                BD->LTabelas->NEL--;
-                return SUCESSO;
-            }
-        } else {
-            NOG *actual = BD->LTabelas->Inicio;
-            while (actual) {
-                NOG *next = actual->Prox;
-                TABELA *atualT = (TABELA *) actual->Info;
+        // Agora ou encontrei ou n?o
+        if (STOP == 1) {
+            // Remover o que est? no P
+            if (Ant)
+                Ant->Prox = P->Prox;
+            else // Caso do inicio
+                BD->LTabelas->Inicio = P->Prox;
+            DELETE_TABLE_DATA(t);
+            DELETE_TABLE_FIELDS(t);
+            free(P->Info);
+            free(P);
+            BD->LTabelas->NEL--;
+            return SUCESSO;
 
-
-                if (strcmp(atualT->NOME_TABELA, t->NOME_TABELA) == 0) {
-                    printf("Found %s\n", atualT->NOME_TABELA);
-
-                    //Nao existe um proximo
-                    if (next == NULL) {
-                        printf("matar");
-                        free(actual);
-                        BD->LTabelas->NEL--;
-                        return SUCESSO;
-                        //actual
-                    } else {
-                        printf("ccccccc");
-                        actual->Prox = next->Prox;
-                        free(actual);
-                        BD->LTabelas->NEL--;
-                        return SUCESSO;
-                    }
-
-                }
-                actual = actual->Prox;
-            }
-            return INSUCESSO;
         }
+        return INSUCESSO;
+
+//        NOG *actual,*prev = BD->LTabelas->Inicio;
+//        if (actual != NULL && actual->Info == t) {
+//            //actual = actual->Prox; // Changed head
+//            free(actual->Info); // free old head
+//           // free(t); // free old head
+//            BD->LTabelas --;
+//            prev = actual->Prox;
+//            return SUCESSO;
+//        }
+
+
+
+//        if (t->LCampos->NEL > 0) {
+//            while (t->LCampos->Inicio) {
+//                printf("Removendo campo %s\n", t->LCampos->Inicio->Info);
+//                NOG *node = t->LCampos->Inicio;
+//
+//                free((CAMPO *) node->Info);
+//
+//
+//                t->LCampos->Inicio = node->Prox;
+//                free(node);
+//                t->LCampos->NEL--;
+//            }
+//            printf("Lista campos %d\n", t->LCampos->NEL);
+//            //todo - perceber pk este free da erro!
+//            // printf("Lista campos %",t->LCampos->Inicio);
+//            free(t->LCampos);
+//
+//        } else {
+//            free(t->LCampos);
+//        }
+//        printf("elementos %d:\n", BD->LTabelas->NEL);
+//        //Remover tabela da lista Tabelas
+//        if (BD->LTabelas->NEL <= 1) {
+//            //Verificar se o unico elemento e o que procuramos
+//            NOG *n = BD->LTabelas->Inicio;
+//            printf("Tentando remover unico elemento\n");
+//            TABELA *aux = BD->LTabelas->Inicio->Info;
+//            if (strcmp(aux->NOME_TABELA, t->NOME_TABELA) == 0) {
+//                printf("Removendo unico elemento\n");
+//                free(aux);
+//                free(n);
+//                BD->LTabelas->NEL--;
+//                return SUCESSO;
+//            }
+//        } else {
+//            NOG *actual = BD->LTabelas->Inicio;
+//            while (actual) {
+//                NOG *next = actual->Prox;
+//                TABELA *atualT = (TABELA *) actual->Info;
+//
+//
+//                if (strcmp(atualT->NOME_TABELA, t->NOME_TABELA) == 0) {
+//                    printf("Found %s\n", atualT->NOME_TABELA);
+//
+//                    //Nao existe um proximo
+//                    if (next == NULL) {
+//                        printf("matar");
+//                        free(actual);
+//                        BD->LTabelas->NEL--;
+//                        return SUCESSO;
+//                        //actual
+//                    } else {
+//                        actual->Prox = next->Prox;
+//                        free(actual);
+//                        BD->LTabelas->NEL--;
+//                        return SUCESSO;
+//                    }
+//
+//                }
+//                actual = actual->Prox;
+//            }
+//            return INSUCESSO;
+//        }
         return SUCESSO;
     }
     return INSUCESSO;

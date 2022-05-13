@@ -62,6 +62,8 @@ int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat);
 int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat);
 //L)	Apagar o conteúdo de uma Tabela. A Tabela continua a existir na BDados, mas não contém os dados, ou seja, os campos continuam, mas os registos são eliminados.
 int DELETE_TABLE_DATA(TABELA *T);
+
+int DELETE_TABLE_FIELDS(TABELA *T);
 //M)	Apagar o conteúdo de uma Tabela e remove a tabela da base de dados.
 int DROP_TABLE(BDadosCoupe *BD, char *nome_tabela);
 //N)	Selecionar (Apresentar no ecran!) da base de dados todos os registos que obedeçam a uma dada condição, a função deve retornar o número de registos selecionados. (Ter em atenção o exemplo das aulas teóricas!). Nota: esta é certamente a funcionalidade mais usada num sistema de base de dados…, por isso se estiver bem otimizada…. O utilizador agradece!!!!

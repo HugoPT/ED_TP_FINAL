@@ -5,7 +5,6 @@
 void showTableFields(void *list) {
     if (!list)return;
     ListaGenerica *temp = (ListaGenerica *) list;
-    printf("A lista contem %d campos\n", temp->NEL);
     NOG *n = temp->Inicio;
     if (!temp->NEL) return;
     printf("+----------------+--------------+\n");
@@ -24,10 +23,10 @@ void showTableFields(void *list) {
 void showTableData(void *list) {
     if (!list)return;
     ListaGenerica *temp = (ListaGenerica *) list;
-    printf("A listbbbbbbbba contem %d registos\n", temp->NEL);
-    if (temp->NEL /2 == 0) return;
+    //printf("A lista contem %d registos\n", temp->NEL);
+    if (temp->NEL / 2 == 0) return;
 
-    printf("A lista contem %d registos\n", temp->NEL / 2);
+    // printf("A lista contem %d registos\n", temp->NEL / 2);
     NOG *n = temp->Inicio;
     printf("+---------Conteudo Tabela--------+\n");
     //printf("+----------------+--------------+\n");
@@ -49,11 +48,12 @@ void showTableData(void *list) {
 
 int main() {
     //Instanciate BD
-    BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao 1.0");
-    //Create Table for Clients
+    BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao-1.0");
+//    //Create Table for Clients
     TABELA *clientes = Criar_Tabela(BD, "CLIENTES");
-    //Create Table for Moradas
+//    //Create Table for Moradas
     TABELA *moradas = Criar_Tabela(BD, "MORADAS");
+    //Create table for cities
     TABELA *cidades = Criar_Tabela(BD, "CIDADES");
     //Add fields to clients
     Add_Campo_Tabela(clientes, "ID", "INT");
@@ -62,40 +62,46 @@ int main() {
     //Add fields to addresses
     Add_Campo_Tabela(moradas, "ID", "INT");
     Add_Campo_Tabela(moradas, "LOCALIDADE", "STRING");
-
+    //Add fields to cities
     Add_Campo_Tabela(cidades, "ID", "INT");
     Add_Campo_Tabela(cidades, "NOME", "STRING");
+//
+//    //Add values to table clients
+    Add_Valores_Tabela(clientes, "1;Hugo;37");
+    Add_Valores_Tabela(clientes, "2;Andre;22");
+    Add_Valores_Tabela(clientes, "3;Paulo;22");
+    Add_Valores_Tabela(clientes, "4;Filipe;45");
+    Add_Valores_Tabela_BDados(BD, "CLIENTES", "5;Ana;34");
 
-    //Add values to table clients
-    Add_Valores_Tabela(clientes, "1;Hugo");
-    Add_Valores_Tabela(clientes, "2;Andre");
-    Add_Valores_Tabela(clientes, "3;Paulo");
-    // Add_Valores_Tabela_BDados(BD, "CLIENTES", "4;Andrubal");
-
+//todo problema no meio ????
+    Add_Valores_Tabela(moradas, "1;Rua do Faro");
+    Add_Valores_Tabela(moradas, "2;Rua direita");
+//    Add_Valores_Tabela(moradas, "3;Ruatorta");
 
     Add_Valores_Tabela(cidades, "1;Viseu");
-    //Add values to table addresses
-    Add_Valores_Tabela(moradas, "1;Viseu");
-    Add_Valores_Tabela(moradas, "2;Lisboa");
-    //Add_Valores_Tabela_BDados(BD, "MORADAS", "3;Porto");
+    Add_Valores_Tabela(cidades, "2;Lisboa");
+    Add_Valores_Tabela(cidades, "3;Evora");
+    Add_Valores_Tabela_BDados(BD, "cidades", "4;Porto");
+//
+//
+//    //Show List with user delegate function
+//    MostrarLG(moradas->LCampos, showTableFields);
+//    MostrarLG(moradas->LRegistos, showTableData);
+//
+//    MostrarLG(cidades->LCampos, showTableFields);
+//    MostrarLG(cidades->LRegistos, showTableData);
 
 
-    //Show List with user delegate function
-   // MostrarLG(clientes->LCampos, showTableFields);
-   // MostrarLG(clientes->LRegistos, showTableData);
+//
+//    //Show List with user delegate function
+//    // MostrarLG(moradas->LCampos, showTableFields);
+//    //Show List with user delegate function
+//    // MostrarLG(moradas->LRegistos, showTableData);
+//
 
-    //MostrarLG(cidades->LRegistos, showTableData);
-    //MostrarLG(cidades->LRegistos, showTableData);
-
-    //Show List with user delegate function
-    // MostrarLG(moradas->LCampos, showTableFields);
-    //Show List with user delegate function
-    // MostrarLG(moradas->LRegistos, showTableData);
-
-
-   // Mostrar_Tabela_NOME(BD, "MORADAS");
+    //Mostrar_Tabela_NOME(BD, "CIDADES");
     //Show DB
-  //  Mostrar_BDados(BD);
+    //  Mostrar_BDados(BD);
 
     //Search for a table in DB
 //    TABELA *t = Pesquisar_Tabela(BD, "CLIENTES");
@@ -115,18 +121,35 @@ int main() {
     //-------
     //Memoria_Desperdicada_BDados(BD);
 
-    //DROP_TABLE(BD, "CIDADES");
-    //DROP_TABLE(BD, "MORADAS");
-    //DROP_TABLE(BD, "CLIENTES");
-    printf("Tabelas %d\n", BD->LTabelas->NEL);
+//    DROP_TABLE(BD, "CIDADES");
+//    printf("Existem %d tabelas\n",BD->LTabelas->NEL);
 
-   // MostrarLG(BD->LTabelas, showTableData);
+//    printf("------------------\n");
+//    DROP_TABLE(BD, "CLIENTES");
+//
+//    DROP_TABLE(BD, "MORADAS");
+   // DROP_TABLE(BD, "CLIENTES");
+
+
+   //Funcao permite passar a extensao ou nao internamente adiciona e aloca memoria dinamica
+    Exportar_BDados_Excel(BD,"dados_exportados");
+    Exportar_BDados_Excel(BD,"dados_exportados2.csv");
+
+    Exportar_Tabela_BDados_Excel(BD,"CIDADES","cidades");
+    Exportar_Tabela_BDados_Excel(BD,"MORADAS","moradas.csv");
+
+    Mostrar_BDados(BD);
+    //Memoria_Desperdicada_BDados(BD);
+    // MostrarLG(BD->LTabelas, showTableData);
     //showTableData(moradas);
     //Show wasted memory
     //Memoria_Desperdicada_BDados(BD);
 
     //Dealoc DB
-    Destruir_BDados(BD);
+
+    //Destruir_BDados(BD);
+
+    // Memoria_Desperdicada_BDados(BD);
 
     return 0;
 }
