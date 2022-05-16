@@ -1,8 +1,10 @@
 
 #include <stdint.h>
+#include <ctype.h>
+
 #include "BDadosCoupe.h"
 
-#define FIXED_SIZE_ARRAY 50
+#define FIXED_SIZE_ARRAY 50L
 
 /** \brief Criar_BDados: A) Criar a Base de dados
  *
@@ -29,11 +31,10 @@ BDadosCoupe *Criar_BDados(char *nome_bd, char *versao) {
  */
 TABELA *Criar_Tabela(BDadosCoupe *BD, char *nome_tabela) {
     TABELA *table = (TABELA *) malloc(sizeof(TABELA));
-
-    strcpy(table->NOME_TABELA, nome_tabela);
+//The table name is converted to UPPERCASE
+    strcpy(table->NOME_TABELA, strupr(nome_tabela));
     table->LCampos = CriarLG();
     table->LRegistos = CriarLG();
-
     AddLG(BD->LTabelas, table);
     return table;
 }
@@ -60,6 +61,7 @@ int Add_Campo_Tabela(TABELA *T, char *nome_campo, char *tipo_campo) {
 int Add_Valores_Tabela(TABELA *T, char *dados) {
     if (!T)return INSUCESSO;
     if (dados) {
+
         char *tmp = (char *) malloc(sizeof(strlen(dados) + 1));
         strcpy(tmp, dados);
         char *data = strtok(tmp, ";");
@@ -69,6 +71,8 @@ int Add_Valores_Tabela(TABELA *T, char *dados) {
             data = strtok(NULL, ";");
             AddLG(T->LRegistos, registo);
         }
+        //todo resolver este free
+        tmp = NULL;
         free(tmp);
         return SUCESSO;
     }
@@ -84,8 +88,17 @@ int Add_Valores_Tabela(TABELA *T, char *dados) {
  * @return : SUCESSO - Case of success\n
  *          :INSUCESSO - Case of fail
  */
+
+
+
 int Add_Valores_Tabela_BDados(BDadosCoupe *BD, char *nome_tabela, char *dados) {
-    TABELA *T = Pesquisar_Tabela(BD, nome_tabela);
+    if (!BD)return INSUCESSO;
+    if (!nome_tabela)return INSUCESSO;
+    if (!dados)return INSUCESSO;
+    char *tbl_name = (char *) malloc(sizeof(char) * strlen(nome_tabela) + 1);
+    strcpy(tbl_name, nome_tabela);
+    TABELA *T = Pesquisar_Tabela(BD, strupr(tbl_name));
+    free(tbl_name);
     if (T) {
         return Add_Valores_Tabela(T, dados);
     }
@@ -144,7 +157,7 @@ void Mostrar_Tabela(TABELA *T) {
             printf("\n");
             pos = 0;
         }
-        printf("%s\t\t", n->Info);
+        printf("%s\t\t", (char *) n->Info);
         pos++;
         n = n->Prox;
 
@@ -168,13 +181,11 @@ void Mostrar_BDados(BDadosCoupe *BD) {
 void Destruir_BDados(BDadosCoupe *BD) {
     if (!BD)return;
     if (BD->LTabelas->NEL > 0) {
-        NOG *n = BD->LTabelas->Inicio;
         printf("%d\n", BD->LTabelas->NEL);
-        while (n) {
-            TABELA *t = n->Info;
-            printf(" Destruindo %s\n", t->NOME_TABELA);
-            DROP_TABLE(BD, t->NOME_TABELA);
-            n = n->Prox;
+        while ( BD->LTabelas->NEL) {
+            TABELA *inicio = BD->LTabelas->Inicio->Info;
+            printf(" Destruindo %s\n", inicio->NOME_TABELA);
+            DROP_TABLE(BD, inicio->NOME_TABELA);
         }
     }
     free(BD->LTabelas);
@@ -193,7 +204,7 @@ long int Memoria_BDados(BDadosCoupe *BD) {
 
 long int Memoria_Desperdicada_BDados(BDadosCoupe *BD) {
     if (!BD) return -1;
-    long int wasted_memory = 0;
+    long wasted_memory = 0;
     //Evaluate the memory used in BD head
     wasted_memory += FIXED_SIZE_ARRAY - (strlen(BD->NOME_BDADOS) + 1);
     wasted_memory += FIXED_SIZE_ARRAY - (strlen(BD->VERSAO_BDADOS) + 1);
@@ -217,7 +228,7 @@ long int Memoria_Desperdicada_BDados(BDadosCoupe *BD) {
         node = node->Prox;
     }
 
-    printf("Memoria desperdicada na BD %d BYTES \n", wasted_memory);
+    printf("Memoria desperdicada na BD %ld BYTES \n", wasted_memory);
     return wasted_memory;
 
     //Analisar desperdicio nos seguintes campos
@@ -264,13 +275,13 @@ int Exportar_Tabela_BDados_Excel(BDadosCoupe *BD, char *tabela, char *ficheir_cs
         if (ExpBD) {
             NOG *Aux = found_table->LCampos->Inicio;
             while (Aux) {
-                fprintf(ExpBD, "%s;", Aux->Info);
+                fprintf(ExpBD, "%s;", (char *) Aux->Info);
                 Aux = Aux->Prox;
             }
             fprintf(ExpBD, "\n");
             Aux = found_table->LRegistos->Inicio;
             while (Aux) {
-                fprintf(ExpBD, "%s;", Aux->Info);
+                fprintf(ExpBD, "%s;", (char *) Aux->Info);
                 Aux = Aux->Prox;
                 i++;
                 if (i == found_table->LCampos->NEL) {
@@ -323,14 +334,14 @@ int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
             fprintf(ExpBD, "%s\n", t->NOME_TABELA);
             fprintf(ExpBD, "%d\n", t->LCampos->NEL);
             while (Aux) {
-                fprintf(ExpBD, "%s;", Aux->Info);
+                fprintf(ExpBD, "%s;", (char *) Aux->Info);
                 Aux = Aux->Prox;
             }
             fprintf(ExpBD, "\n");
             Aux = t->LRegistos->Inicio;
             fprintf(ExpBD, "%d\n", t->LRegistos->NEL / t->LCampos->NEL);
             while (Aux) {
-                fprintf(ExpBD, "%s;", Aux->Info);
+                fprintf(ExpBD, "%s;", (char *) Aux->Info);
                 Aux = Aux->Prox;
                 i++;
                 if (i == t->LCampos->NEL) {
@@ -354,7 +365,6 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     if (!BD) return INSUCESSO;
     if (!ficheir_csv) return INSUCESSO;
 
-    int i = 0;
     char extension[5] = ".csv";
     char *file_name = NULL;
     char *have_extension = strstr(ficheir_csv, ".csv");
@@ -409,13 +419,12 @@ int DELETE_TABLE_DATA(TABELA *T) {
     if (!T)return INSUCESSO;
     if (T->LRegistos->NEL > 0) {
         NOG *node = T->LRegistos->Inicio;
-        while (node) {
-            //printf("Removendo dados %s\n", node->Info);
+        while (T->LRegistos->NEL) {
+
             NOG *aux = node;
             free(aux->Info);
             node = aux->Prox;
             free(aux);
-
             T->LRegistos->NEL--;
         }
         return SUCESSO;
@@ -444,12 +453,9 @@ int DELETE_TABLE_FIELDS(TABELA *T) {
 int DROP_TABLE(BDadosCoupe *BD, char *nome_tabela) {
     if (!BD)return INSUCESSO;
     if (strlen(nome_tabela) < 1)return INSUCESSO;
-
     TABELA *t = Pesquisar_Tabela(BD, nome_tabela);
     if (t) {
         printf("Droping table %s\n", t->NOME_TABELA);
-
-
         NOG *P = BD->LTabelas->Inicio;
         NOG *Ant = NULL;
         int STOP = 0;
@@ -470,8 +476,10 @@ int DROP_TABLE(BDadosCoupe *BD, char *nome_tabela) {
                 Ant->Prox = P->Prox;
             else // Caso do inicio
                 BD->LTabelas->Inicio = P->Prox;
+
             DELETE_TABLE_DATA(t);
             DELETE_TABLE_FIELDS(t);
+            printf("aqui");
             free(P->Info);
             free(P);
             BD->LTabelas->NEL--;

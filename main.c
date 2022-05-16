@@ -53,7 +53,7 @@ int main() {
     TABELA *clientes = Criar_Tabela(BD, "CLIENTES");
 //    //Create Table for Moradas
     TABELA *moradas = Criar_Tabela(BD, "MORADAS");
-    //Create table for cities
+//    //Create table for cities
     TABELA *cidades = Criar_Tabela(BD, "CIDADES");
     //Add fields to clients
     Add_Campo_Tabela(clientes, "ID", "INT");
@@ -62,10 +62,10 @@ int main() {
     //Add fields to addresses
     Add_Campo_Tabela(moradas, "ID", "INT");
     Add_Campo_Tabela(moradas, "LOCALIDADE", "STRING");
-    //Add fields to cities
+//    //Add fields to cities
     Add_Campo_Tabela(cidades, "ID", "INT");
     Add_Campo_Tabela(cidades, "NOME", "STRING");
-//
+////
 //    //Add values to table clients
     Add_Valores_Tabela(clientes, "1;Hugo;37");
     Add_Valores_Tabela(clientes, "2;Andre;22");
@@ -75,19 +75,19 @@ int main() {
 
 //todo problema no meio ????
     Add_Valores_Tabela(moradas, "1;Rua do Faro");
-    Add_Valores_Tabela(moradas, "2;Rua direita");
+//    Add_Valores_Tabela(moradas, "2;Rua direita");
 //    Add_Valores_Tabela(moradas, "3;Ruatorta");
-
-    Add_Valores_Tabela(cidades, "1;Viseu");
+//
+    Add_Valores_Tabela(cidades, "1;Viseu NELAS");
     Add_Valores_Tabela(cidades, "2;Lisboa");
     Add_Valores_Tabela(cidades, "3;Evora");
-    Add_Valores_Tabela_BDados(BD, "cidades", "4;Porto");
+    Add_Valores_Tabela_BDados(BD, "CIDADES", "4;Porto");
 //
 //
 //    //Show List with user delegate function
 //    MostrarLG(moradas->LCampos, showTableFields);
 //    MostrarLG(moradas->LRegistos, showTableData);
-//
+////
 //    MostrarLG(cidades->LCampos, showTableFields);
 //    MostrarLG(cidades->LRegistos, showTableData);
 
@@ -99,13 +99,12 @@ int main() {
 //    // MostrarLG(moradas->LRegistos, showTableData);
 //
 
-    //Mostrar_Tabela_NOME(BD, "CIDADES");
-    //Show DB
-    //  Mostrar_BDados(BD);
+    Mostrar_Tabela_NOME(BD, "CIDADES");
+
 
     //Search for a table in DB
-//    TABELA *t = Pesquisar_Tabela(BD, "CLIENTES");
-//    t != NULL ? printf("Tabela encontrada %s\n", t->NOME_TABELA) : printf("!!! Tabela nao encontrada !!!\n");
+    TABELA *t = Pesquisar_Tabela(BD, "CLIENTES");
+    t != NULL ? printf("Tabela encontrada %s\n", t->NOME_TABELA) : printf("!!! Tabela nao encontrada !!!\n");
 //    MostrarLG(clientes->LRegistos, showTableData);
 //    DELETE_TABLE_DATA(t);
 //    MostrarLG(clientes->LRegistos, showTableData);
@@ -132,22 +131,23 @@ int main() {
 
 
    //Funcao permite passar a extensao ou nao internamente adiciona e aloca memoria dinamica
-    Exportar_BDados_Excel(BD,"dados_exportados");
-    Exportar_BDados_Excel(BD,"dados_exportados2.csv");
-
-    Exportar_Tabela_BDados_Excel(BD,"CIDADES","cidades");
-    Exportar_Tabela_BDados_Excel(BD,"MORADAS","moradas.csv");
-
-    Mostrar_BDados(BD);
-    //Memoria_Desperdicada_BDados(BD);
+//    Exportar_BDados_Excel(BD,"dados_exportados");
+//    Exportar_BDados_Excel(BD,"dados_exportados2.csv");
+//
+//    Exportar_Tabela_BDados_Excel(BD,"CIDADES","cidades");
+//    Exportar_Tabela_BDados_Excel(BD,"MORADAS","moradas.csv");
+//
+//    Mostrar_BDados(BD);
+    Memoria_Desperdicada_BDados(BD);
     // MostrarLG(BD->LTabelas, showTableData);
     //showTableData(moradas);
     //Show wasted memory
     //Memoria_Desperdicada_BDados(BD);
 
     //Dealoc DB
-
-    //Destruir_BDados(BD);
+    //Show DB
+    Mostrar_BDados(BD);
+    Destruir_BDados(BD);
 
     // Memoria_Desperdicada_BDados(BD);
 
