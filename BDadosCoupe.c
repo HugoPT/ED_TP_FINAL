@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <ctype.h>
 
+
 #include "BDadosCoupe.h"
 
 #define FIXED_SIZE_ARRAY 50L
@@ -62,11 +63,16 @@ int Add_Valores_Tabela(TABELA *T, char *dados) {
     if (!T)return INSUCESSO;
     if (dados) {
 
-        char *tmp = (char *) malloc(sizeof(strlen(dados) + 1));
+        char *tmp = (char *) malloc(sizeof(char) * (strlen(dados) + 1));
         strcpy(tmp, dados);
+
+
         char *data = strtok(tmp, ";");
+
+
         while (data != NULL) {
-            char *registo = (char *) malloc(sizeof(strlen(data) + 1));
+
+            char *registo = (char *) malloc(sizeof(char) * (strlen(data) + 1));
             strcpy(registo, data);
             data = strtok(NULL, ";");
             AddLG(T->LRegistos, registo);
@@ -181,8 +187,7 @@ void Mostrar_BDados(BDadosCoupe *BD) {
 void Destruir_BDados(BDadosCoupe *BD) {
     if (!BD)return;
     if (BD->LTabelas->NEL > 0) {
-        printf("%d\n", BD->LTabelas->NEL);
-        while ( BD->LTabelas->NEL) {
+        while (BD->LTabelas->NEL) {
             TABELA *inicio = BD->LTabelas->Inicio->Info;
             printf(" Destruindo %s\n", inicio->NOME_TABELA);
             DROP_TABLE(BD, inicio->NOME_TABELA);
@@ -362,46 +367,86 @@ int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
 }
 
 int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
-    if (!BD) return INSUCESSO;
-    if (!ficheir_csv) return INSUCESSO;
+    int Importar_BDados_Excel(BDadosCoupe * BD, char * ficheir_csv) {
+        if (!BD) return INSUCESSO;
+        if (!ficheir_csv) return INSUCESSO;
 
-    char extension[5] = ".csv";
-    char *file_name = NULL;
-    char *have_extension = strstr(ficheir_csv, ".csv");
-    //Handle file passed with extension or just file name
-    if (!have_extension) {
-        //Passed file has no extension.We add it for you :-)
-        printf("Nao tem  extensao\n");
-        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
-        strcpy(file_name, ficheir_csv);
-        strcat(file_name, extension);
-    } else {
-        //Passed file has extension. All good to go :)
-        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
-        strcpy(file_name, ficheir_csv);
-    }
-    FILE *ExpBD;
+        char extension[5] = ".csv";
+        char * file_name = NULL;
+        char * have_extension = strstr(ficheir_csv, ".csv");
+        //Handle file passed with extension or just file name
+        if (!have_extension) {
+            //Passed file has no extension.We add it for you ?
+            printf("Nao tem  extensao\n");
+            file_name = (char * ) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
+            strcpy(file_name, ficheir_csv);
+            strcat(file_name, extension);
+        } else {
+            //Passed file has extension. All good to go ?
 
-    ExpBD = fopen(file_name, "r");
-    if (ExpBD) {
-        char teste[50];
-        char Buffer[20];
-        while (!feof(ExpBD)) {
-            fscanf(ExpBD, "%s\n", Buffer);
-
-            //printf("%s\n",Buffer);
-            fgets(teste, 100, ExpBD);
-
-            printf("%s", teste);
-
+            file_name = (char * ) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
+            strcpy(file_name, ficheir_csv);
 
         }
+        FILE * ExpBD;
+
+        ExpBD = fopen(file_name, "r");
+        if (ExpBD == NULL) {
+            printf("Erro!\n");
+            exit(-1);
+        }
+        int nt = 0;
+
+        fscanf(ExpBD, "%s", BD -> NOME_BDADOS);
+        fscanf(ExpBD, "%s", BD -> VERSAO_BDADOS);
+        fscanf(ExpBD, "%d", & nt);
+        printf("%s\n", BD -> NOME_BDADOS);
+        printf("%s\n", BD -> VERSAO_BDADOS);
+        printf("%d\n", nt);
+
+        char NomeTABELA[50];
+        char LerCampos[50];
+        char LerRegistos[50];
+        int nCampos;
+        int nRegistos;
+
+
+        for (int i = 0; i < nt; i++) {
+            fscanf(ExpBD, "%s", NomeTABELA);
+            printf("%s\n", NomeTABELA);
+            TABELA * nomeTb = Criar_Tabela(BD, NomeTABELA);
+            fscanf(ExpBD, "%d", & nCampos);
+            printf("%d\n", nCampos);
+            fscanf(ExpBD, "%s", LerCampos);
+            printf("[%s]\n", LerCampos);
+            if (LerCampos) {
+
+                char * tmp = (char * ) malloc(sizeof(strlen(LerCampos) + 1));
+                strcpy(tmp, LerCampos);
+                char * data = strtok(tmp, ";");
+                while (data != NULL) {
+                    char * registo = (char * ) malloc(sizeof(strlen(data) + 1));
+                    strcpy(registo, data);
+                    data = strtok(NULL, ";");
+                    Add_Campo_Tabela(nomeTb, registo, "char");
+                }
+                tmp = NULL;
+                free(tmp);
+            }
+
+            fscanf(ExpBD, "%d", & nRegistos);
+            for (int b = 0; b < nRegistos; b++) {
+
+                fscanf(ExpBD, "%s", LerRegistos);
+                Add_Valores_Tabela(nomeTb,LerRegistos);
+                printf("%s\n", LerRegistos);
+
+            }
+        }
+
         fclose(ExpBD);
         return SUCESSO;
-
     }
-    printf("Erro ao recriar BD via ficheiro!\n");
-    exit(-1);
 
 
 }
@@ -571,6 +616,55 @@ int DROP_TABLE(BDadosCoupe *BD, char *nome_tabela) {
 //N)	Selecionar (Apresentar no ecran!) da base de dados todos os registos que obedeçam a uma dada condição, a função deve retornar o número de registos selecionados. (Ter em atenção o exemplo das aulas teóricas!). Nota: esta é certamente a funcionalidade mais usada num sistema de base de dados…, por isso se estiver bem otimizada…. O utilizador agradece!!!!
 int
 SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *nome_campo, char *valor_comparacao) {
+    if (!BD)return INSUCESSO;
+    if (!strlen(_tabela))return INSUCESSO;
+    if (!f_condicao)return INSUCESSO;
+    if (!strlen(nome_campo))return INSUCESSO;
+    if (!strlen(valor_comparacao))return INSUCESSO;
+
+
+    TABELA *tmp = Pesquisar_Tabela(BD, _tabela);
+    if (tmp) {
+
+        //Check if the nome campo exists
+        NOG *field = tmp->LCampos->Inicio;
+        while (field){
+
+            if(strcmp(field->Info,nome_campo) == 0){
+                printf("Nome do campo %s",field->Info);
+            }
+            field = field->Prox;
+        }
+        //Mostrar_Tabela(tmp);
+        //if (!temp->NEL) return INSUCESSO;
+        printf("+----------------+--------------+\n");
+        printf("| %s          | Valor         |\n", nome_campo);
+        printf("+----------------+--------------+\n");
+        NOG *n = tmp->LRegistos->Inicio;
+        int separator = tmp->LCampos->NEL;
+        int pos = 1;
+        int found = 0;
+        while (n) {
+            CAMPO *c = (CAMPO *) n->Info;
+
+            if (f_condicao(n->Info, valor_comparacao)) {
+                found = 1;
+                printf("| %s\t\t", c->NOME_CAMPO);
+                pos++;
+                if (pos > separator) {
+                    printf("\n");
+                    pos = 1;
+                }
+            }
+
+
+            n = n->Prox;
+        }
+        printf("+----------------+--------------+\n");
+
+    }
+
+
     return SUCESSO;
 }
 
