@@ -43,13 +43,6 @@ void DestruirLG(ListaGenerica *L, void (*func)(void *)) {
  * @return  : SUCESSO or INSUCESSO
  */
 int AddLG(ListaGenerica *L, void *X) {
-//    if (!L) return INSUCESSO;
-//    NOG *node = (NOG *)malloc(sizeof(NOG));
-//    node->Info = X;
-//    node->Prox = L->Inicio;
-//    L->Inicio = node;
-//    L->NEL++;
-
     if (!L)return INSUCESSO;
     if (!X)return INSUCESSO;
     if (L->Inicio == NULL) {

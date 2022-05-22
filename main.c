@@ -18,7 +18,6 @@ void showTableFields(void *list) {
     printf("+----------------+--------------+\n");
 
 }
-
 //Query functions
 int equalMatch(char * value1, char*value2){
     return !strcmp(value1,value2);
@@ -34,40 +33,31 @@ int lessThen(int value1, int value2){
 
 }
 
-
-
 //Delegate functions for print table content
 void showTableData(void *list) {
     if (!list)return;
     ListaGenerica *temp = (ListaGenerica *) list;
     //printf("A lista contem %d registos\n", temp->NEL);
-    if (temp->NEL / 2 == 0) return;
-
-    // printf("A lista contem %d registos\n", temp->NEL / 2);
+    if (!temp->NEL ) return;
     NOG *n = temp->Inicio;
     printf("+---------Conteudo Tabela--------+\n");
     //printf("+----------------+--------------+\n");
     printf("| ID             | Nome         |\n");
-    int formatter = 1;
     while (n) {
-        if (formatter > 2) {
-            printf("|\n");
-            formatter = 1;
+        NOG *p = ((ListaGenerica*)(n->Info))->Inicio;
+        while (p){
+            printf("%s\t\t",(char*)p->Info);
+            p = p->Prox;
         }
-        printf("%s\t\t", (char*)n->Info);
-        formatter++;
+        printf("\n");
         n = n->Prox;
     }
-    printf("|\n");
     printf("+----------------+--------------+\n");
 
 }
 
 int main() {
     //Instanciate BD
-ListaGenerica *l = CriarLG();
-    printf("Tamanho ocupado pela lista %d",sizeof (l));
-
     BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao-1.0");
 //    //Create Table for Clients
     TABELA *clientes = Criar_Tabela(BD, "CLIENTES");
@@ -93,22 +83,24 @@ ListaGenerica *l = CriarLG();
     Add_Valores_Tabela(clientes, "2;Andre;22");
     Add_Valores_Tabela(clientes, "3;Paulo;22");
     Add_Valores_Tabela(clientes, "4;Filipe;45");
-    Add_Valores_Tabela_BDados(BD, "CLIENTES", "5;Ana;34");
+    //Add_Valores_Tabela_BDados(BD, "CLIENTES", "5;Ana;34");
 
-////todo problema no meio ????
-//    Add_Valores_Tabela(moradas, "1;RuaDoVoltaAtraz");
-//    Add_Valores_Tabela(moradas, "2;Ruadireita");
-//    Add_Valores_Tabela(moradas, "3;Ruatorta");
-////
+    Add_Valores_Tabela(moradas, "1;RuaDoVoltaAtraz");
+    Add_Valores_Tabela(moradas, "2;Ruadireita");
+    Add_Valores_Tabela(moradas, "3;Ruatorta");
+    Add_Valores_Tabela(moradas, "4;Ruatorta");
+    Add_Valores_Tabela(moradas, "5;Ruatorta");
+    Add_Valores_Tabela_BDados(BD, "MORADAS", "6;RuaDaTorre");
+
     Add_Valores_Tabela(cidades, "1;Viseu NELAS");
     Add_Valores_Tabela(cidades, "2;Lisboa");
     Add_Valores_Tabela(cidades, "3;Evora");
-    Add_Valores_Tabela_BDados(BD, "CIDADES", "4;Porto");
+    //Add_Valores_Tabela_BDados(BD, "CIDADES", "4;Porto");
 ////
 //
 //    //Show List with user delegate function
-//    MostrarLG(moradas->LCampos, showTableFields);
-//    MostrarLG(moradas->LRegistos, showTableData);
+    MostrarLG(moradas->LCampos, showTableFields);
+    MostrarLG(moradas->LRegistos, showTableData);
 ////
 //    MostrarLG(cidades->LCampos, showTableFields);
 //    MostrarLG(cidades->LRegistos, showTableData);
@@ -170,12 +162,15 @@ ListaGenerica *l = CriarLG();
     //Show DB
 
 
-    Mostrar_BDados(BD);
+    //Mostrar_BDados(BD);
 
 
-
-    SELECT(BD,"MORADAS",equalMatch,"Nome","2");
-    Destruir_BDados(BD);
+//    TABELA *t = Pesquisar_Tabela(BD, "MORADAS");
+//    Mostrar_Tabela(t);
+//
+    SELECT(BD,"MORADAS",equalMatch,"LOCALIDADE","Ruatorta");
+    //
+   // Destruir_BDados(BD);
 
     // Memoria_Desperdicada_BDados(BD);
 
