@@ -18,35 +18,41 @@ void showTableFields(void *list) {
     printf("+----------------+--------------+\n");
 
 }
+
 //Query functions
-int equalMatch(char * value1, char*value2){
-    return !strcmp(value1,value2);
+int equalMatch(char *value1, char *value2) {
+    if( value1 == NULL  || value2 == NULL) return 0;
+    return !strcmp(value1, value2);
 }
-int greaterThen(char *value1, char *value2){
-    int num_1 = atoi(value2);
+
+int greaterThen(char *value1, char *value2) {
+    if( value1 == NULL  || value2 == NULL) return 0;
+    int num_1 = atoi(value1);
     int num_2 = atoi(value2);
-    return value1>value2;
-
+    return num_1 > num_2;
 }
-int lessThen(int value1, int value2){
-    return value1>value2;
 
+int lessThen(char *value1, char *value2) {
+    if( value1 == NULL  || value2 == NULL) return 0;
+    int num_1 = atoi(value1);
+    int num_2 = atoi(value2);
+    int val = num_1 < num_2;
+    return num_1 < num_2;
 }
 
 //Delegate functions for print table content
 void showTableData(void *list) {
     if (!list)return;
     ListaGenerica *temp = (ListaGenerica *) list;
-    //printf("A lista contem %d registos\n", temp->NEL);
-    if (!temp->NEL ) return;
+    if (!temp->NEL) return;
     NOG *n = temp->Inicio;
     printf("+---------Conteudo Tabela--------+\n");
     //printf("+----------------+--------------+\n");
-    printf("| ID             | Nome         |\n");
+    printf("| ID             | Conteudo         |\n");
     while (n) {
-        NOG *p = ((ListaGenerica*)(n->Info))->Inicio;
-        while (p){
-            printf("%s\t\t",(char*)p->Info);
+        NOG *p = ((ListaGenerica *) (n->Info))->Inicio;
+        while (p) {
+            printf("%s\t\t", (char *) p->Info);
             p = p->Prox;
         }
         printf("\n");
@@ -79,7 +85,6 @@ int main() {
 ////
 //    //Add values to table clients
     Add_Valores_Tabela(clientes, "1;Hugo;37");
-
     Add_Valores_Tabela(clientes, "2;Andre;22");
     Add_Valores_Tabela(clientes, "3;Paulo;22");
     Add_Valores_Tabela(clientes, "4;Filipe;45");
@@ -88,8 +93,8 @@ int main() {
     Add_Valores_Tabela(moradas, "1;RuaDoVoltaAtraz");
     Add_Valores_Tabela(moradas, "2;Ruadireita");
     Add_Valores_Tabela(moradas, "3;Ruatorta");
-    Add_Valores_Tabela(moradas, "4;Ruatorta");
-    Add_Valores_Tabela(moradas, "5;Ruatorta");
+    Add_Valores_Tabela(moradas, "4;Ruacentral");
+    Add_Valores_Tabela(moradas, "5;RuaViseu");
     Add_Valores_Tabela_BDados(BD, "MORADAS", "6;RuaDaTorre");
 
     Add_Valores_Tabela(cidades, "1;Viseu NELAS");
@@ -99,11 +104,11 @@ int main() {
 ////
 //
 //    //Show List with user delegate function
-    MostrarLG(moradas->LCampos, showTableFields);
-    MostrarLG(moradas->LRegistos, showTableData);
+    // MostrarLG(moradas->LCampos, showTableFields);
+    //MostrarLG(moradas->LRegistos, showTableData);
 ////
-//    MostrarLG(cidades->LCampos, showTableFields);
-//    MostrarLG(cidades->LRegistos, showTableData);
+    // MostrarLG(cidades->LCampos, showTableFields);
+    //MostrarLG(cidades->LRegistos, showTableData);
 
 
 //
@@ -121,11 +126,12 @@ int main() {
 //    t != NULL ? printf("Tabela encontrada %s\n", t->NOME_TABELA) : printf("!!! Tabela nao encontrada !!!\n");
 //    MostrarLG(clientes->LRegistos, showTableData);
 //    DELETE_TABLE_DATA(t);
-//    MostrarLG(clientes->LRegistos, showTableData);
-//    Add_Valores_Tabela(clientes, "1;hugo");
-//    Add_Valores_Tabela(clientes, "2;Andre");
-//    Add_Valores_Tabela(clientes, "3;Paulo");
-//    Add_Valores_Tabela_BDados(BD, "CLIENTES", "4;Andrubal");
+//
+//    //MostrarLG(clientes->LRegistos, showTableData);
+//    Add_Valores_Tabela(clientes, "1;hugo;37");
+//    Add_Valores_Tabela(clientes, "2;Andre;22");
+//    Add_Valores_Tabela(clientes, "3;Paulo;22");
+//    Add_Valores_Tabela_BDados(BD, "CLIENTES", "4;Andrubal;33");
 //    MostrarLG(clientes->LRegistos, showTableData);
 
     //Show wasted memory
@@ -162,17 +168,17 @@ int main() {
     //Show DB
 
 
-    //Mostrar_BDados(BD);
+    // Mostrar_BDados(BD);
 
 
 //    TABELA *t = Pesquisar_Tabela(BD, "MORADAS");
 //    Mostrar_Tabela(t);
 //
-    SELECT(BD,"MORADAS",equalMatch,"LOCALIDADE","Ruatorta");
+    SELECT(BD, "MORADAS", greaterThen, "ID", "3");
     //
-   // Destruir_BDados(BD);
+    // Destruir_BDados(BD);
 
     // Memoria_Desperdicada_BDados(BD);
 
-    return 0 ;
+    return 0;
 }

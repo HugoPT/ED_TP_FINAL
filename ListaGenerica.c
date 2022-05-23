@@ -10,6 +10,7 @@ ListaGenerica *CriarLG() {
 
 void DestruirLG(ListaGenerica *L, void (*func)(void *)) {
     if (!L) return;
+    if (!func) return;
     NOG *node = L->Inicio;
     NOG *Aux = NULL;
     while (node)
@@ -20,20 +21,6 @@ void DestruirLG(ListaGenerica *L, void (*func)(void *)) {
         node = Aux;
     }
     free(L);
-//    if (!L)return;
-//    if (L->NEL > 0) {
-//        while (L->Inicio) {
-//            NOG *node = L->Inicio;
-//            func(node->Info);
-//            L->Inicio = node->Prox;
-//            free(node);
-//        }
-//        free(L);
-//    } else {
-//        free(L);
-//    }
-
-
 }
 
 /**

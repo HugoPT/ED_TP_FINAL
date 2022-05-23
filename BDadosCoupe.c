@@ -73,7 +73,6 @@ int Add_Valores_Tabela(TABELA *T, char *dados) {
             AddLG(row, registo);
         }
         AddLG(T->LRegistos, row);
-        //todo resolver este free
         tmp = NULL;
         free(tmp);
         return SUCESSO;
@@ -143,30 +142,29 @@ void Mostrar_Tabela_NOME(BDadosCoupe *BD, char *tabela) {
 
 void Mostrar_Tabela(TABELA *T) {
     if (!T) return;
-    printf("------------Tabela [%s]------------\n", T->NOME_TABELA);
     if (!T->LCampos->NEL)return;
+    printf("------------Tabela [%s]------------\n", T->NOME_TABELA);
     NOG *n = T->LCampos->Inicio;
-    int fields_count = T->LCampos->NEL;
-    int pos = 0;
-
     while (n) {
         CAMPO *c = (CAMPO *) n->Info;
         printf("[%s] (%s)\t", c->NOME_CAMPO, c->TIPO);
         n = n->Prox;
     }
     printf("\n");
-    n = T->LRegistos->Inicio;
-    while (n) {
-        if (pos >= fields_count) {
-            printf("\n");
-            pos = 0;
-        }
-        printf("%s\t\t", (char *) n->Info);
-        pos++;
-        n = n->Prox;
 
+
+    NOG *registerListNode = T->LRegistos->Inicio;
+    while (registerListNode) {
+        ListaGenerica *ab = registerListNode->Info;
+        NOG *pointer = ab->Inicio;
+        while (pointer) {
+            printf("%s\t\t", (char *) pointer->Info);
+            pointer = pointer->Prox;
+        }
+        printf("\n");
+        registerListNode = registerListNode->Prox;
     }
-    printf("\n-----[A tabela contem %d registos]-----\n\n", T->LRegistos->NEL / T->LCampos->NEL);
+    printf("-----[A tabela contem %d registos]-----\n\n", T->LRegistos->NEL);
 }
 
 //H)	Mostrar toda a base de dados, deverá mostrar todas as Tabelas da BDados.
@@ -486,22 +484,26 @@ int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     return SUCESSO;
 }
 
+void destroy_info_string(void *info){
+    free(info);
+}
+void destroy_info(void *info){
+    printf("Info is already free\n");
+}
 //L)	Apagar o conteúdo de uma Tabela. A Tabela continua a existir na BDados, mas não contém os dados, ou seja, os campos continuam, mas os registos são eliminados.
 int DELETE_TABLE_DATA(TABELA *T) {
     if (!T)return INSUCESSO;
-    if (T->LRegistos->NEL > 0) {
-        NOG *node = T->LRegistos->Inicio;
-        while (T->LRegistos->NEL) {
-
-            NOG *aux = node;
-            free(aux->Info);
-            node = aux->Prox;
-            free(aux);
-            T->LRegistos->NEL--;
-        }
-        return SUCESSO;
+    NOG *registerListNode = T->LRegistos->Inicio;
+    while (registerListNode) {
+        //Destuir cada row de REGISTOS
+        DestruirLG(registerListNode->Info,destroy_info_string);
+        registerListNode = registerListNode->Prox;
     }
-    return INSUCESSO;
+    //Destruir a Lista de Registos totalmente
+    DestruirLG(T->LRegistos,destroy_info);
+    //Criar uma nova vazia
+    T->LRegistos = CriarLG();
+    return SUCESSO;
 }
 
 int DELETE_TABLE_FIELDS(TABELA *T) {
@@ -654,7 +656,7 @@ void printResultNode(NOG *node) {
 void showHeaderTable(NOG *node) {
     printf("+---------SELECT RESULT --------+\n");
     while (node) {
-        printf("%s\t\t|",(char*)node->Info);
+        printf("%s\t\t|", (char *) node->Info);
         node = node->Prox;
     }
     printf("\n");
@@ -690,7 +692,6 @@ SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *
         }
 
 
-
         showHeaderTable(table->LCampos->Inicio);
         int register_count = 0;
         //Pointer to the REGISTOS List
@@ -698,7 +699,7 @@ SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *
         while (node) {
             NOG *p = ((REGISTO *) (node->Info))->Inicio;
             while (p) {
-                if (f_condicao(p->Info, valor_comparacao)) {
+                if (f_condicao((char*)p->Info, valor_comparacao)) {
                     register_count++;
                     printResultNode(node);
                 }
