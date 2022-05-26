@@ -16,7 +16,7 @@ void DestruirLG(ListaGenerica *L, void (*func)(void *)) {
     while (node)
     {
         Aux = node->Prox;
-        func (node->Info);
+        if (func !=NULL) func (node->Info);
         free (node);
         node = Aux;
     }

@@ -1,6 +1,28 @@
 #include <stdio.h>
 #include "BDadosCoupe.h"
 
+
+int menu_principal() {
+    int x;
+    printf("\n\n# MENU PRINCIPAL ------------------------------------------#");
+    printf("\n| (1) Criar Tabela                    |");
+    printf("\n| (2) Mostrar Tabela   |");
+    printf("\n| (3) Adicionar campo tabela   |");
+    printf("\n| (3) Adicionar registos na tabela                 |");
+    printf("\n| (4) Exportar Tabela->CSV               |");
+
+    printf("\n| -------------------------------------------------------- |");
+    printf("\n|       (0) SAIR                                           |");
+    printf("\n#----------------------------------------------------------#\n");
+    fflush(stdin);
+    do {
+        printf("\n  Qual a sua opcao ? ");
+        fflush(stdin);
+        scanf("%d", &x);
+    } while (x < 0 || x > 10);
+    return x;
+}
+
 //Delegate functions for print list fields
 void showTableFields(void *list) {
     if (!list)return;
@@ -21,19 +43,19 @@ void showTableFields(void *list) {
 
 //Query functions
 int equalMatch(char *value1, char *value2) {
-    if( value1 == NULL  || value2 == NULL) return 0;
+    if (value1 == NULL || value2 == NULL) return 0;
     return !strcmp(value1, value2);
 }
 
 int greaterThen(char *value1, char *value2) {
-    if( value1 == NULL  || value2 == NULL) return 0;
+    if (value1 == NULL || value2 == NULL) return 0;
     int num_1 = atoi(value1);
     int num_2 = atoi(value2);
     return num_1 > num_2;
 }
 
 int lessThen(char *value1, char *value2) {
-    if( value1 == NULL  || value2 == NULL) return 0;
+    if (value1 == NULL || value2 == NULL) return 0;
     int num_1 = atoi(value1);
     int num_2 = atoi(value2);
     int val = num_1 < num_2;
@@ -47,7 +69,6 @@ void showTableData(void *list) {
     if (!temp->NEL) return;
     NOG *n = temp->Inicio;
     printf("+---------Conteudo Tabela--------+\n");
-    //printf("+----------------+--------------+\n");
     printf("| ID             | Conteudo         |\n");
     while (n) {
         NOG *p = ((ListaGenerica *) (n->Info))->Inicio;
@@ -65,8 +86,91 @@ void showTableData(void *list) {
 int main() {
     //Instanciate BD
     BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao-1.0");
+    //Importar_BDados_Excel(BD, "ExpBD.csv");
+    Exportar_BDados_Ficheiro_Binario(BD,"ab.dat");
+    //Importar_BDados_Ficheiro_Binario(BD,"ab.dat");
+    //Importar_BDados_Excel(BD, "ExpBD.csv");
+
+//    char buffer[50];
+//    for (;;) {
+//        system("cls");
+//        switch (menu_principal()) {
+//            case 1:
+//                printf("Qual o nome da tabela que deseja criar?\n");
+//                fflush(stdin);
+//                scanf("%s", buffer);
+//
+//                Criar_Tabela(BD, buffer);
+//                Mostrar_BDados(BD);
+//                break;
+//            case 2:
+//                Mostrar_BDados(BD);
+//                break;
+//            case 3:
+//                printf("Qual o nome da tabela que adicionar campos? criar?\n");
+//                fflush(stdin);
+//                scanf("%s", buffer);
+//                TABELA *t = Pesquisar_Tabela(BD, buffer);
+//                if (!t) {
+//                    printf("Tabela nao encontrada!!!\n");
+//                    break;
+//                }
+//                char data1[50];
+//                char data2[50];
+//                printf("Qual o nome do campos? criar?\n");
+//                fflush(stdin);
+//                scanf("%s", data1);
+//                printf("Qual o tipo de dados? criar? (INT) (STRING) (FLOAT)\n");
+//                fflush(stdin);
+//                scanf("%s", data2);
+//                Add_Campo_Tabela(t, data1, data2);
+//                break;
+//            case 4:
+//                printf("Qual a tabela que prentende adicionar registos?\n");
+//                fflush(stdin);
+//                scanf("%s", buffer);
+//                TABELA *t2 = Pesquisar_Tabela(BD, buffer);
+//                if (!t2) {
+//                    printf("Tabela nao encontrada");
+//                    break;
+//                }
+//                Mostrar_Tabela(t2);
+//                printf("Indique os dados separados por ; ?\n");
+//                fflush(stdin);
+//                scanf("%s", buffer);
+//                Add_Valores_Tabela(t2, buffer);
+//                Mostrar_Tabela(t2);
+//                break;
+//                break;
+//            case 5:
+//                SELECT(BD, "MORADAS", equalMatch, "LOCALIDADE", "RuaViseu");
+//                break;
+//            case 6:
+//                printf("opca6\n");
+//                break;
+//            case 7:
+//                printf("opcao7\n");
+//                break;
+//            case 8:
+//                printf("opcao8\n");
+//                break;
+//            case 9:
+//                printf("opcao9\n");
+//                break;
+//            case 10:  // para facilitar os testes
+//                printf("opcao10\n");
+//                break;
+//            case 0:
+//                Destruir_BDados(BD);
+//                exit(0);    // Fim do Programa
+//                break;
+//        } //END switch (menu_principal())
+//        //system("pause");1
+//    }
+
+
 //    //Create Table for Clients
-    TABELA *clientes = Criar_Tabela(BD, "CLIENTES");
+/*   TABELA *clientes = Criar_Tabela(BD, "CLIENTES");
 //    //Create Table for Moradas
     TABELA *moradas = Criar_Tabela(BD, "MORADAS");
 //    //Create table for cities
@@ -97,16 +201,15 @@ int main() {
     Add_Valores_Tabela(moradas, "5;RuaViseu");
     Add_Valores_Tabela_BDados(BD, "MORADAS", "6;RuaDaTorre");
 
-    Add_Valores_Tabela(cidades, "1;Viseu NELAS");
+    Add_Valores_Tabela(cidades, "1;Viseu-NELAS");
     Add_Valores_Tabela(cidades, "2;Lisboa");
-    Add_Valores_Tabela(cidades, "3;Evora");
+    Add_Valores_Tabela(cidades, "3;Evora");*/
     //Add_Valores_Tabela_BDados(BD, "CIDADES", "4;Porto");
-////
 //
 //    //Show List with user delegate function
     // MostrarLG(moradas->LCampos, showTableFields);
     //MostrarLG(moradas->LRegistos, showTableData);
-////
+
     // MostrarLG(cidades->LCampos, showTableFields);
     //MostrarLG(cidades->LRegistos, showTableData);
 
@@ -129,7 +232,7 @@ int main() {
 //
 //    //MostrarLG(clientes->LRegistos, showTableData);
 //    Add_Valores_Tabela(clientes, "1;hugo;37");
-//    Add_Valores_Tabela(clientes, "2;Andre;22");
+    //  Add_Valores_Tabela(clientes, "2;Andre;22");
 //    Add_Valores_Tabela(clientes, "3;Paulo;22");
 //    Add_Valores_Tabela_BDados(BD, "CLIENTES", "4;Andrubal;33");
 //    MostrarLG(clientes->LRegistos, showTableData);
@@ -174,9 +277,16 @@ int main() {
 //    TABELA *t = Pesquisar_Tabela(BD, "MORADAS");
 //    Mostrar_Tabela(t);
 //
-    SELECT(BD, "MORADAS", greaterThen, "ID", "3");
-    //
-    // Destruir_BDados(BD);
+// SELECT(BD, "MORADAS", greaterThen, "ID", "3");
+    //Exportar_BDados_Excel(BD,"ExpBD.csv");
+
+    Mostrar_BDados(BD);
+    printf("-------------------------------------------------------\n");
+    SELECT(BD, "MORADAS", equalMatch, "LOCALIDADE", "RuaViseu");
+    UPDATE(BD,"CIDADES",equalMatch,"ID","2","NOME","CidadeModificada");
+    printf("-------------------------------------------------------\n");
+    Mostrar_BDados(BD);
+   // Destruir_BDados(BD);
 
     // Memoria_Desperdicada_BDados(BD);
 
