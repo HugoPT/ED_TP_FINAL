@@ -83,11 +83,40 @@ void showTableData(void *list) {
 
 }
 
+
+
+
+char * splitString(char * inputString){
+    char *data = malloc(sizeof (char) * strlen(inputString) +1);
+    void  *containner = malloc(sizeof (void *) * 2);
+    strcpy(data,inputString);
+    char delimiter[] = "|";
+    char *p = strtok(data, delimiter);
+    int pos = 0;
+    while(p != NULL)
+    {
+        printf("'-----%s'\n", p);
+        containner[pos] = malloc(sizeof (char)* strlen(p)+1);
+        pos++;
+        p = strtok(NULL, delimiter);
+    }
+    printf("\n");
+    free(data);
+    return *containner;
+}
 int main() {
     //Instanciate BD
+
     BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao-1.0");
-    //Importar_BDados_Excel(BD, "ExpBD.csv");
-    Exportar_BDados_Ficheiro_Binario(BD,"ab.dat");
+    Importar_BDados_Excel(BD, "new.csv");
+    Mostrar_BDados(BD);
+
+    //Importar_BDados_Excel(BD, "EXPBD.csv");
+    //Exportar_BDados_Excel(BD,"new.csv");
+
+    //Destruir_BDados(BD);
+
+    //Exportar_BDados_Ficheiro_Binario(BD,"ab.dat");
     //Importar_BDados_Ficheiro_Binario(BD,"ab.dat");
     //Importar_BDados_Excel(BD, "ExpBD.csv");
 
@@ -170,7 +199,7 @@ int main() {
 
 
 //    //Create Table for Clients
-/*   TABELA *clientes = Criar_Tabela(BD, "CLIENTES");
+  /* TABELA *clientes = Criar_Tabela(BD, "CLIENTES");
 //    //Create Table for Moradas
     TABELA *moradas = Criar_Tabela(BD, "MORADAS");
 //    //Create table for cities
@@ -203,7 +232,10 @@ int main() {
 
     Add_Valores_Tabela(cidades, "1;Viseu-NELAS");
     Add_Valores_Tabela(cidades, "2;Lisboa");
-    Add_Valores_Tabela(cidades, "3;Evora");*/
+    Add_Valores_Tabela(cidades, "3;Evora");
+    //Exportar_BDados_Excel(BD,"new.csv");
+
+    */
     //Add_Valores_Tabela_BDados(BD, "CIDADES", "4;Porto");
 //
 //    //Show List with user delegate function
@@ -280,13 +312,19 @@ int main() {
 // SELECT(BD, "MORADAS", greaterThen, "ID", "3");
     //Exportar_BDados_Excel(BD,"ExpBD.csv");
 
-    Mostrar_BDados(BD);
-    printf("-------------------------------------------------------\n");
-    SELECT(BD, "MORADAS", equalMatch, "LOCALIDADE", "RuaViseu");
-    UPDATE(BD,"CIDADES",equalMatch,"ID","2","NOME","CidadeModificada");
-    printf("-------------------------------------------------------\n");
-    Mostrar_BDados(BD);
-   // Destruir_BDados(BD);
+    //Mostrar_BDados(BD);
+
+    Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
+
+    SELECT(BD, "CLIENTES", lessThen, "ID", "3");
+    //UPDATE(BD,"CLIENTES",lessThen,"ID","2","NOME","AndreFilipe");
+    //DELETE(BD,"CLIENTES",lessThen,"ID","3");
+
+//    Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
+//    Add_Valores_Tabela(Pesquisar_Tabela(BD,"CLIENTES"), "3;Paulo;22");
+//    Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
+    //Mostrar_BDados(BD);
+    Destruir_BDados(BD);
 
     // Memoria_Desperdicada_BDados(BD);
 

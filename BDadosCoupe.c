@@ -212,25 +212,26 @@ long int Memoria_BDados(BDadosCoupe *BD) {
     //Iterates Table list
     while (node) {
         TABELA *t = (TABELA *) node->Info;
-        total_memory+=FIXED_SIZE_ARRAY+sizeof(NOG)+2*POINTERSIZE; // Tablename+Node+2 pointers to list
-        printf("%d",sizeof(NOG*));
+        total_memory += FIXED_SIZE_ARRAY + sizeof(NOG) + 2 * POINTERSIZE; // Tablename+Node+2 pointers to list
+        printf("%d", sizeof(NOG *));
         // Iterates Table Fields for each table, since it can differ for every single one
         NOG *node_LCampos = t->LCampos->Inicio;
         while (node_LCampos) {
-            total_memory += sizeof(CAMPO)+sizeof(NOG)+POINTERSIZE; // Each field is a Node with CAMPO as info and pointer to next node Total: 60+16+8=84Bytes
+            total_memory += sizeof(CAMPO) + sizeof(NOG) +
+                            POINTERSIZE; // Each field is a Node with CAMPO as info and pointer to next node Total: 60+16+8=84Bytes
             node_LCampos = node_LCampos->Prox;
         }
         //Iterates Entries, amount can also differ from table to table
         NOG *node_LRegistos = t->LRegistos->Inicio;
         while (node_LRegistos) {
-            ListaGenerica *lregistos= node_LRegistos->Info;
-            total_memory+= sizeof(NOG);
-            NOG* row= lregistos->Inicio;
+            ListaGenerica *lregistos = node_LRegistos->Info;
+            total_memory += sizeof(NOG);
+            NOG *row = lregistos->Inicio;
             int i = 1;
-            while(row){
-                total_memory += sizeof(NOG) + (strlen((char *)(row->Info)) + 1);
+            while (row) {
+                total_memory += sizeof(NOG) + (strlen((char *) (row->Info)) + 1);
                 i++;
-                row=row->Prox;
+                row = row->Prox;
             }
             node_LRegistos = node_LRegistos->Prox;
         }
@@ -240,6 +241,7 @@ long int Memoria_BDados(BDadosCoupe *BD) {
     printf("Memoria total da BD %ld BYTES \n", total_memory);
     return total_memory;
 }
+
 long int Memoria_Desperdicada_BDados(BDadosCoupe *BD) {
     if (!BD) return -1;
     long wasted_memory = 0;
@@ -354,7 +356,8 @@ int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
             fprintf(ExpBD, "%s\n", t->NOME_TABELA);
             fprintf(ExpBD, "%d\n", t->LCampos->NEL);
             while (Aux) {
-                fprintf(ExpBD, "%s;", Aux->Info);
+                CAMPO *C = (CAMPO *) Aux->Info;
+                fprintf(ExpBD, "%s|%s;", C->NOME_CAMPO, C->TIPO);
                 Aux = Aux->Prox;
             }
             fprintf(ExpBD, "\n");
@@ -381,6 +384,102 @@ int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     return INSUCESSO;
 }
 
+//int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
+//    if (!BD) return INSUCESSO;
+//    if (!ficheir_csv) return INSUCESSO;
+//
+//    char extension[5] = ".csv";
+//    char *file_name = NULL;
+//    char *have_extension = strstr(ficheir_csv, ".csv");
+//    //Handle file passed with extension or just file name
+//    if (!have_extension) {
+//        //Passed file has no extension.We add it for you ?
+//        printf("Nao tem  extensao\n");
+//        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
+//        strcpy(file_name, ficheir_csv);
+//        strcat(file_name, extension);
+//    } else {
+//        //Passed file has extension. All good to go
+//        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
+//        strcpy(file_name, ficheir_csv);
+//    }
+//    FILE *ExpBD;
+//
+//    ExpBD = fopen(file_name, "r");
+//    if (ExpBD == NULL) {
+//        printf("Erro!\n");
+//        exit(-1);
+//    }
+//    int nt = 0;
+//
+//    fscanf(ExpBD, "%s", BD->NOME_BDADOS);
+//    fscanf(ExpBD, "%s", BD->VERSAO_BDADOS);
+//    fscanf(ExpBD, "%d", &nt);
+//    printf("%s\n", BD->NOME_BDADOS);
+//    printf("%s\n", BD->VERSAO_BDADOS);
+//    printf("%d\n", nt);
+//
+//    char NomeTABELA[50];
+//    char LerCampos[50];
+//    char LerRegistos[50];
+//    int nCampos;
+//    int nRegistos;
+//
+//
+//    for (int i = 0; i < nt; i++) {
+//        fscanf(ExpBD, "%s", NomeTABELA);
+//        printf("%s\n", NomeTABELA);
+//        TABELA *nomeTb = Criar_Tabela(BD, NomeTABELA);
+//        fscanf(ExpBD, "%d", &nCampos);
+//        printf("%d\n", nCampos);
+//        fscanf(ExpBD, "%s", LerCampos);
+//        printf("[%s]\n", LerCampos);
+//
+//
+//        char *tmp = (char *) malloc(sizeof(char) * (strlen(LerCampos) + 1));
+//        strcpy(tmp, LerCampos);
+//
+//        char *data = strtok(tmp, ";");
+//        int is_separated = 0;
+//        char buffer[50];
+//        while (data != NULL) {
+//            char *registo = (char *) malloc(sizeof(char) * strlen(data) + 1);
+//            strcpy(registo, data);
+//            data = strtok(NULL, ";");
+//
+//            char *fields = strtok(data, "|");
+//            printf("----next header\n");
+//            while (fields != NULL) {
+//                printf("---%s\n", fields);
+//                if(!is_separated){
+//                    strcpy(buffer,fields);
+//                    is_separated = 1;
+//                }else{
+//                    Add_Campo_Tabela(nomeTb, buffer, fields);
+//                    is_separated = 0;
+//                }
+//                fields = strtok(NULL, " |");
+//            }
+//
+//
+//        }
+//        tmp = NULL;
+//        free(tmp);
+//
+//
+//        fscanf(ExpBD, "%d", &nRegistos);
+//        for (int b = 0; b < nRegistos; b++) {
+//
+//            fscanf(ExpBD, "%s", LerRegistos);
+//            Add_Valores_Tabela(nomeTb, LerRegistos);
+//            printf("%s\n", LerRegistos);
+//
+//        }
+//    }
+//
+//    fclose(ExpBD);
+//    return SUCESSO;
+//}
 int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     if (!BD) return INSUCESSO;
     if (!ficheir_csv) return INSUCESSO;
@@ -396,7 +495,7 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
         strcpy(file_name, ficheir_csv);
         strcat(file_name, extension);
     } else {
-        //Passed file has extension. All good to go ?
+        //Passed file has extension. All good to go :)
 
         file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
         strcpy(file_name, ficheir_csv);
@@ -412,44 +511,74 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     int nt = 0;
 
     fscanf(ExpBD, "%s", BD->NOME_BDADOS);
+    //Read the database version
     fscanf(ExpBD, "%s", BD->VERSAO_BDADOS);
+    //Read the number of tables stored
     fscanf(ExpBD, "%d", &nt);
-//    printf("%s\n", BD->NOME_BDADOS);
-//    printf("%s\n", BD->VERSAO_BDADOS);
-//    printf("%d\n", nt);
 
     char NomeTABELA[50];
     char LerCampos[50];
     char LerRegistos[50];
+    //char LerTipo[10];
     int nCampos;
     int nRegistos;
 
 
     for (int i = 0; i < nt; i++) {
         fscanf(ExpBD, "%s", NomeTABELA);
-        //printf("%s\n", NomeTABELA);
         TABELA *nomeTb = Criar_Tabela(BD, NomeTABELA);
         fscanf(ExpBD, "%d", &nCampos);
-        //printf("%d\n", nCampos);
         fscanf(ExpBD, "%s", LerCampos);
-        //printf("[%s]\n", LerCampos);
-        //TODO este if n parece bem
-        if (LerCampos) {
+        printf("Campos lidos %s\n",LerCampos);
 
-            char *tmp = (char *) malloc(sizeof(char) * (strlen(LerCampos) + 1));
-            strcpy(tmp, LerCampos);
-            char *data = strtok(tmp, ";");
 
-            while (data != NULL) {
-                char *registo = (char *) malloc((strlen(data) + 1));
-                strcpy(registo, data);
-                data = strtok(NULL, ";");
-                //TODO o tipo char aqui n esta correcto
-                Add_Campo_Tabela(nomeTb, registo, "char");
-            }
-            tmp = NULL;
-            free(tmp);
+        char *tmp = (char *) malloc(sizeof(char) * (strlen(LerCampos) + 1));
+        strcpy(tmp, LerCampos);
+
+        char *data = strtok(tmp, ";");
+        printf("Table Begin---------\n");
+        while (data != NULL) {
+            char *registo = (char *) malloc((strlen(data) + 1));
+            strcpy(registo, data);
+            data = strtok(NULL, ";");
+            printf("--- Header %s ---\n", registo);
+
+            char *fields = strtok(registo, "|");
+
+
+            printf("----next header\n\n");
+            free(registo);
+
+//            int pos = 0;
+//            int is_separated = 0;
+//            char buffer1[50];
+//            char buffer2[50];
+//
+//            while (fields != NULL) {
+//                printf("---------  %d ---- %s\n", pos,fields);
+//                pos++;
+//                if(!is_separated){
+//                    strcpy(buffer1,fields);
+//                    is_separated = 1;
+//                }else{
+//                    strcpy(buffer2,fields);
+//                    Add_Campo_Tabela(nomeTb, buffer1, buffer2);
+//                    is_separated = 0;
+//                }
+////
+////
+////                }
+//                fields = strtok(NULL, " |");
+//            }
+//            pos = 0;
+
+
+            //Add_Campo_Tabela(nomeTb, LerCampos,LerTipo);
         }
+        free(tmp);
+        tmp = NULL;
+
+        //Read the table data
         fscanf(ExpBD, "%d", &nRegistos);
         for (int b = 0; b < nRegistos; b++) {
             fscanf(ExpBD, "%s", LerRegistos);
@@ -460,6 +589,7 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     fclose(ExpBD);
     return SUCESSO;
 }
+
 
 int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     if (!BD) return -1;
@@ -486,19 +616,19 @@ int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     ExpBD = fopen(file_name, "wb");
 
     NOG *n = BD->LTabelas->Inicio;
-   fwrite(BD->NOME_BDADOS,50,1,ExpBD);
-   fwrite(BD->VERSAO_BDADOS,50,1,ExpBD);
-   fwrite(&BD->LTabelas->NEL,sizeof(int),1,ExpBD);
+    fwrite(BD->NOME_BDADOS, 50, 1, ExpBD);
+    fwrite(BD->VERSAO_BDADOS, 50, 1, ExpBD);
+    fwrite(&BD->LTabelas->NEL, sizeof(int), 1, ExpBD);
     while (n) {
         TABELA *t = (TABELA *) n->Info;
         NOG *Aux = t->LCampos->Inicio;
 
-        fwrite(&t->LCampos->NEL, sizeof (int), 1, ExpBD);
-        printf("Exportei n campos : %d\n",t->LCampos->NEL);
+        fwrite(&t->LCampos->NEL, sizeof(int), 1, ExpBD);
+        printf("Exportei n campos : %d\n", t->LCampos->NEL);
 
-        while(Aux){
-            CAMPO *C = (CAMPO *)Aux->Info;
-            fwrite(C,sizeof(CAMPO),1,ExpBD);
+        while (Aux) {
+            CAMPO *C = (CAMPO *) Aux->Info;
+            fwrite(C, sizeof(CAMPO), 1, ExpBD);
             Aux = Aux->Prox;
         }
 
@@ -563,9 +693,9 @@ int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     }
     int nt = 0;
 
-    fread(BD->NOME_BDADOS,50,1,ExpBD);
-    fread(BD->VERSAO_BDADOS,50,1,ExpBD);
-    fread(&nt,sizeof(int),1,ExpBD);
+    fread(BD->NOME_BDADOS, 50, 1, ExpBD);
+    fread(BD->VERSAO_BDADOS, 50, 1, ExpBD);
+    fread(&nt, sizeof(int), 1, ExpBD);
     printf("%s\n", BD->NOME_BDADOS);
     printf("%s\n", BD->VERSAO_BDADOS);
     printf("%d\n", nt);
@@ -578,16 +708,15 @@ int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     int nCharCampos;
     int nCharReg;
 
-    for (int ind_t = 0; ind_t < nt; ind_t++)
-    {
+    for (int ind_t = 0; ind_t < nt; ind_t++) {
         //fread(&nt,sizeof(int),1,ExpBD);
-        fread(&nCampos,sizeof(int),1,ExpBD);
+        fread(&nCampos, sizeof(int), 1, ExpBD);
         // printf("Li n Campos- %d\n",nt);
-        printf("valor ncampos%d\n",nCampos);
-        for(int i = 0; i < nCampos;i++){
+        printf("valor ncampos%d\n", nCampos);
+        for (int i = 0; i < nCampos; i++) {
             CAMPO C;
-            fread(&C, sizeof(CAMPO),1,ExpBD);
-            printf("Li tamanho campos - %s : %s\n",C.NOME_CAMPO, C.TIPO);
+            fread(&C, sizeof(CAMPO), 1, ExpBD);
+            printf("Li tamanho campos - %s : %s\n", C.NOME_CAMPO, C.TIPO);
         }
     }
 
@@ -798,18 +927,27 @@ void printResultNode(NOG *node) {
     //printf("+------------------------------+\n");
 }
 
-void showHeaderTable(NOG *node) {
-    printf("+---------SELECT RESULT --------+\n");
+void showHeaderTable(NOG *node, char *title) {
+    printf("+------------------ %s  QUERY---------------+\n", title);
+    int formatter = 0;
     while (node) {
-        printf("%s\t\t|", (char *) node->Info);
+        if (formatter > 0) {
+            printf("[%s]\t\t", (char *) node->Info);
+            formatter = 0;
+        } else {
+            printf("%s", (char *) node->Info);
+            formatter++;
+        }
+
         node = node->Prox;
     }
     printf("\n");
-    printf("+------------------------------+\n");
+
 }
 
 //N)	Selecionar (Apresentar no ecran!) da base de dados todos os registos que obedeçam a uma dada condição, a função deve retornar o número de registos selecionados. (Ter em atenção o exemplo das aulas teóricas!). Nota: esta é certamente a funcionalidade mais usada num sistema de base de dados…, por isso se estiver bem otimizada…. O utilizador agradece!!!!
-int SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *nome_campo, char *valor_comparacao) {
+int
+SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *nome_campo, char *valor_comparacao) {
     if (!BD)return INSUCESSO;
     if (!strlen(_tabela))return INSUCESSO;
     if (!f_condicao)return INSUCESSO;
@@ -838,7 +976,7 @@ int SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
         }
 
         //printf("Campo no indice %d\n\n", field_pos);
-        showHeaderTable(table->LCampos->Inicio);
+        showHeaderTable(table->LCampos->Inicio, "SELECT");
         int register_count = 0;
         //Pointer to the REGISTOS List
         NOG *node = table->LRegistos->Inicio;
@@ -857,7 +995,6 @@ int SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
             }
             node = node->Prox;
         }
-        printf("+------------------------------+\n");
         printf("Foram encontrados %d registos\n", register_count);
 
     }
@@ -865,21 +1002,131 @@ int SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
 }
 
 
+//NOG *deleteRegister(ListaGenerica *l, NOG *currentNode) {
+//
+//    if (!l) return NULL;
+//    if (!currentNode) return NULL;
+//    NOG *node = l->Inicio;
+//    NOG *aux = NULL;
+//    while (node) {
+//        if (node == currentNode) {
+//            printf("encontrei o node %s", node->Info);
+//            aux = node->Prox;
+//            DestruirLG(currentNode->Info, destroy_info_string);
+//            free(node);
+//            l->NEL--;
+//            l->Inicio = aux;
+//        }
+//        node = node->Prox;
+//
+//        printf("aqui");
+//
+//    }
+//
+//
+//}
+
+NOG *removeRegister(ListaGenerica *l, NOG *element) {
+    if (!l)return NULL;
+    int procura = 1;
+    NOG *ret, *ant, *actual;
+    ant = actual = l->Inicio;
+    while (procura) {
+        if (actual == NULL)procura = 0;
+        else if (actual == element)
+            procura = 0;
+        else {
+            ant = actual;
+            actual = actual->Prox;
+        }
+        if (actual != NULL) {
+            ret = actual;
+            if (l->Inicio == actual) {
+                DestruirLG(actual->Info, destroy_info_string);
+                l->NEL--;
+                l->Inicio = actual->Prox;
+            } else {
+                DestruirLG(actual->Info, destroy_info_string);
+                l->NEL--;
+                ant->Prox = actual->Prox;
+            }
+        } else {
+            ret = NULL;
+        }
+        return ret;
+    }
+
+    return NULL;
+}
+
 //O)	Remover todos os registos que obedeçam a uma dada condição, a função deve retornar o número de registos removidos.
-int DELETE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *nome_campo, char *valor_comparacao) {
+int
+DELETE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *nome_campo, char *valor_comparacao) {
+    if (!BD)return INSUCESSO;
+    if (!strlen(_tabela))return INSUCESSO;
+    if (!f_condicao)return INSUCESSO;
+    if (!strlen(nome_campo))return INSUCESSO;
+    if (!strlen(valor_comparacao))return INSUCESSO;
+
+    TABELA *table = Pesquisar_Tabela(BD, _tabela);
+    if (table) {
+        //Check if the nome campo exists
+        NOG *field = table->LCampos->Inicio;
+        int i = 0;
+        int field_found = 0;
+        int field_pos;
+        while (field) {
+            if (strcmp((char *) field->Info, nome_campo) == 0) {
+                field_found = 1;
+                field_pos = i;
+                break;
+            }
+            i++;
+            field = field->Prox;
+        }
+        if (!field_found) {
+            printf("\tNao foram encontrados registos com esse nome de campo!!!\n");
+            return INSUCESSO;
+        }
+
+        //printf("Campo no indice %d\n\n", field_pos);
+        showHeaderTable(table->LCampos->Inicio, "DROP");
+        int register_count = 0;
+        //Pointer to the REGISTOS List
+        NOG *node = table->LRegistos->Inicio;
+        while (node) {
+            NOG *p = ((REGISTO *) (node->Info))->Inicio;
+            int pos = 0;
+            //NOG*aux  = NULL;
+            while (p) {
+                if (field_pos == pos) {
+                    printf("Comparing %s with %s", (char *) p->Info, valor_comparacao);
+                    if (f_condicao((char *) p->Info, valor_comparacao)) {
+                        printResultNode(removeRegister(table->LRegistos, node));
+                    }
+                }
+                pos++;
+                p = p->Prox;
+            }
+            node = node->Prox;
+        }
+        printf("+------------------------------+\n");
+        printf("Foram encontrados %d registos\n", register_count);
+
+    }
     return SUCESSO;
 }
 
-void updateREGISTER(NOG *r,int field_pos,char* newValue){
-    if(!r)return;
-    if(!newValue)return;
+void updateREGISTER(NOG *r, int field_pos, char *newValue) {
+    if (!r)return;
+    if (!newValue)return;
     int pos = 0;
-    while (r){
-        if(field_pos = pos){
-            printf("Atualizando ID %s na posicao %d com valor novo de %s\n",(char*)r->Info,field_pos,newValue);
+    while (r) {
+        if (field_pos = pos) {
+            printf("Atualizando ID %s na posicao %d com valor novo de %s\n", (char *) r->Info, field_pos, newValue);
             free(r->Info);
-            r->Info = (char *) malloc(sizeof (char)* strlen(newValue)+1);
-            strcpy(r->Info,newValue);
+            r->Info = (char *) malloc(sizeof(char) * strlen(newValue) + 1);
+            strcpy(r->Info, newValue);
             return;
         }
         pos++;
@@ -887,8 +1134,8 @@ void updateREGISTER(NOG *r,int field_pos,char* newValue){
     }
 
 
-
 }
+
 //P)	Atualizar todos os registos da tabela onde o Campo é dado, que obedeçam a uma dada condição, a função deve retornar o número de registos que foram atualizados.
 int UPDATE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *campo_comp, char *valor_campo_comp,
            char *nome_campo_update, char *valor_campo_update) {
@@ -931,14 +1178,13 @@ int UPDATE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
         }
 
 
-
         if (!field_found) {
             printf("\tNao foram encontrados registos com esse nome de campo!!!\n");
             return INSUCESSO;
         }
         printf("Campo no indice %d\n\n", field_pos);
 
-        showHeaderTable(table->LCampos->Inicio);
+        showHeaderTable(table->LCampos->Inicio, "UPDATE");
         int register_count = 0;
         //Pointer to the REGISTOS List
         NOG *node = table->LRegistos->Inicio;
@@ -950,7 +1196,7 @@ int UPDATE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
                     //printf("Localizando Registo %s VS %s\n",(char *) p->Info,valor_campo_comp);
                     if (f_condicao((char *) p->Info, valor_campo_comp)) {
                         //printf("Encontrei o registo. vamos alterar ...\n");
-                        updateREGISTER(p,field_update_pos,valor_campo_update);
+                        updateREGISTER(p, field_update_pos, valor_campo_update);
                         register_count++;
                         printResultNode(node);
                     }
@@ -963,8 +1209,7 @@ int UPDATE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
         printf("+------------------------------+\n");
         printf("Foram encontrados %d registos\n", register_count);
 
-    }
-    else{
+    } else {
         printf("Tabela nao encontrada!!!\n");
     }
     return SUCESSO;
