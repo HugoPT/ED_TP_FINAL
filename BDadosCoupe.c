@@ -15,6 +15,9 @@
  * \return BDadosCoupe* : Ponteiro para a Base de Dados Criada
  *
  */
+
+
+
 BDadosCoupe *Criar_BDados(char *nome_bd, char *versao) {
     BDadosCoupe *BD = (BDadosCoupe *) malloc(sizeof(BDadosCoupe));
     strcpy(BD->NOME_BDADOS, nome_bd);
@@ -480,6 +483,33 @@ int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
 //    fclose(ExpBD);
 //    return SUCESSO;
 //}
+
+char *scan(char **pp, char c) {
+    char *s = *pp, *p;
+    p = strchr(*pp, c);
+    if (p) *p++ = '\0';
+    *pp = p;
+    return s;
+}
+typedef char *string;
+string *splitString(const char *inputString) {
+    char *copy_string = malloc(sizeof(char) * strlen(inputString) + 1);
+    string *containner = (string *) malloc(sizeof(string) * 2);
+
+    strcpy(copy_string, inputString);
+
+    char delimiter[] = "|";
+    int pos = 0;
+    char *p = copy_string;
+    while (p) {
+        containner[pos] = (char *) malloc(sizeof(char) * (strlen(p) + 1));
+        strcpy(containner[pos++], scan(&p, '|'));
+    }
+    free(copy_string);
+    return containner;
+}
+
+
 int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     if (!BD) return INSUCESSO;
     if (!ficheir_csv) return INSUCESSO;
@@ -529,51 +559,18 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
         TABELA *nomeTb = Criar_Tabela(BD, NomeTABELA);
         fscanf(ExpBD, "%d", &nCampos);
         fscanf(ExpBD, "%s", LerCampos);
-        printf("Campos lidos %s\n",LerCampos);
-
 
         char *tmp = (char *) malloc(sizeof(char) * (strlen(LerCampos) + 1));
         strcpy(tmp, LerCampos);
 
         char *data = strtok(tmp, ";");
-        printf("Table Begin---------\n");
         while (data != NULL) {
             char *registo = (char *) malloc((strlen(data) + 1));
             strcpy(registo, data);
             data = strtok(NULL, ";");
-            printf("--- Header %s ---\n", registo);
-
-            char *fields = strtok(registo, "|");
-
-
-            printf("----next header\n\n");
+            string *parts = splitString(registo);
+            Add_Campo_Tabela(nomeTb, parts[0], parts[1]);
             free(registo);
-
-//            int pos = 0;
-//            int is_separated = 0;
-//            char buffer1[50];
-//            char buffer2[50];
-//
-//            while (fields != NULL) {
-//                printf("---------  %d ---- %s\n", pos,fields);
-//                pos++;
-//                if(!is_separated){
-//                    strcpy(buffer1,fields);
-//                    is_separated = 1;
-//                }else{
-//                    strcpy(buffer2,fields);
-//                    Add_Campo_Tabela(nomeTb, buffer1, buffer2);
-//                    is_separated = 0;
-//                }
-////
-////
-////                }
-//                fields = strtok(NULL, " |");
-//            }
-//            pos = 0;
-
-
-            //Add_Campo_Tabela(nomeTb, LerCampos,LerTipo);
         }
         free(tmp);
         tmp = NULL;
@@ -589,7 +586,6 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     fclose(ExpBD);
     return SUCESSO;
 }
-
 
 int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     if (!BD) return -1;
@@ -616,52 +612,195 @@ int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     ExpBD = fopen(file_name, "wb");
 
     NOG *n = BD->LTabelas->Inicio;
-    fwrite(BD->NOME_BDADOS, 50, 1, ExpBD);
-    fwrite(BD->VERSAO_BDADOS, 50, 1, ExpBD);
-    fwrite(&BD->LTabelas->NEL, sizeof(int), 1, ExpBD);
+    fwrite(BD->NOME_BDADOS,50,1,ExpBD);
+    fwrite(BD->VERSAO_BDADOS,50,1,ExpBD);
+    fwrite(&BD->LTabelas->NEL,sizeof(int),1,ExpBD);
     while (n) {
         TABELA *t = (TABELA *) n->Info;
         NOG *Aux = t->LCampos->Inicio;
-
-        fwrite(&t->LCampos->NEL, sizeof(int), 1, ExpBD);
-        printf("Exportei n campos : %d\n", t->LCampos->NEL);
-
-        while (Aux) {
-            CAMPO *C = (CAMPO *) Aux->Info;
-            fwrite(C, sizeof(CAMPO), 1, ExpBD);
+        fwrite(t->NOME_TABELA,50,1,ExpBD);
+        fwrite(&t->LCampos->NEL, sizeof (int), 1, ExpBD);
+        while(Aux){
+            CAMPO *C = (CAMPO *)Aux->Info;
+            fwrite(C,sizeof(CAMPO),1,ExpBD);
             Aux = Aux->Prox;
         }
 
-//            fwrite(t->NOME_TABELA,50,1,ExpBD);
-//            fwrite(&t->LCampos->NEL,sizeof(int),1,ExpBD);
-//            while (Aux) {
-//                char *s = (char *)Aux->Info;
-//                int N = strlen(s) + 1;
-//                fwrite(&N, sizeof (int), 1, ExpBD);
-//                fwrite(s,sizeof(char),N,ExpBD);
-//                Aux = Aux->Prox;
-//            }
-//            Aux = t->LRegistos->Inicio;
-//            fwrite(&t->LRegistos->NEL,sizeof(int),1,ExpBD);
-//            while (Aux) {
-//                ListaGenerica *R = (ListaGenerica *) Aux->Info;
-//                NOG *P = R->Inicio;
-//                while(P){
-//                    char *y = (char *)Aux->Info;
-//                    int M = strlen(y) + 1 ;
-//                    fwrite(&M, sizeof (int), 1, ExpBD);
-//                    fwrite(y,sizeof(char),M,ExpBD);
-//                    P = P->Prox;
-//                }
-//                Aux = Aux->Prox;
-//            }
+        Aux = t->LRegistos->Inicio;
+        fwrite(&t->LRegistos->NEL,sizeof(int),1,ExpBD);
+        while (Aux) {
+
+            ListaGenerica *R = (ListaGenerica *) Aux->Info;
+            NOG *x = R->Inicio;
+            while (x){
+                int M = strlen(x->Info) +1 ;
+                fwrite(&M, sizeof (int), 1, ExpBD);
+                fwrite(x->Info, sizeof (char), M, ExpBD);
+                x = x->Prox;
+            }
+            Aux = Aux->Prox;
+        }
         n = n->Prox;
     }
     fclose(ExpBD);
     free(file_name);
     return SUCESSO;
 }
+//int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
+//    if (!BD) return -1;
+//    if (!fich_dat) return -1;
+//
+//    int i = 0;
+//    char extension[5] = ".dat";
+//    char *file_name = NULL;
+//    char *have_extension = strstr(fich_dat, ".dat");
+//    //Handle file passed with extension or just file name
+//    if (!have_extension) {
+//        //Passed file has no extension.We add it for you :-)
+//        printf("Nao tem  extensao\n");
+//        file_name = (char *) malloc(sizeof(char) * strlen(fich_dat) + strlen(extension) + 1);
+//        strcpy(file_name, fich_dat);
+//        strcat(file_name, extension);
+//    } else {
+//        //Passed file has extension. All good to go :)
+//        file_name = (char *) malloc(sizeof(char) * strlen(fich_dat) + 1);
+//        strcpy(file_name, fich_dat);
+//    }
+//
+//    FILE *ExpBD;
+//    ExpBD = fopen(file_name, "wb");
+//
+//    NOG *n = BD->LTabelas->Inicio;
+//    fwrite(BD->NOME_BDADOS, 50, 1, ExpBD);
+//    fwrite(BD->VERSAO_BDADOS, 50, 1, ExpBD);
+//    fwrite(&BD->LTabelas->NEL, sizeof(int), 1, ExpBD);
+//    while (n) {
+//        TABELA *t = (TABELA *) n->Info;
+//        NOG *Aux = t->LCampos->Inicio;
+//
+//        fwrite(&t->LCampos->NEL, sizeof(int), 1, ExpBD);
+//        printf("Exportei n campos : %d\n", t->LCampos->NEL);
+//
+//        while (Aux) {
+//            CAMPO *C = (CAMPO *) Aux->Info;
+//            fwrite(C, sizeof(CAMPO), 1, ExpBD);
+//            Aux = Aux->Prox;
+//        }
+//
+////            fwrite(t->NOME_TABELA,50,1,ExpBD);
+////            fwrite(&t->LCampos->NEL,sizeof(int),1,ExpBD);
+////            while (Aux) {
+////                char *s = (char *)Aux->Info;
+////                int N = strlen(s) + 1;
+////                fwrite(&N, sizeof (int), 1, ExpBD);
+////                fwrite(s,sizeof(char),N,ExpBD);
+////                Aux = Aux->Prox;
+////            }
+////            Aux = t->LRegistos->Inicio;
+////            fwrite(&t->LRegistos->NEL,sizeof(int),1,ExpBD);
+////            while (Aux) {
+////                ListaGenerica *R = (ListaGenerica *) Aux->Info;
+////                NOG *P = R->Inicio;
+////                while(P){
+////                    char *y = (char *)Aux->Info;
+////                    int M = strlen(y) + 1 ;
+////                    fwrite(&M, sizeof (int), 1, ExpBD);
+////                    fwrite(y,sizeof(char),M,ExpBD);
+////                    P = P->Prox;
+////                }
+////                Aux = Aux->Prox;
+////            }
+//        n = n->Prox;
+//    }
+//    fclose(ExpBD);
+//    free(file_name);
+//    return SUCESSO;
+//}
 
+//int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
+//
+//    if (!BD) return INSUCESSO;
+//    if (!fich_dat) return INSUCESSO;
+//
+//    char extension[5] = ".dat";
+//    char *file_name = NULL;
+//    char *have_extension = strstr(fich_dat, ".dat");
+//    //Handle file passed with extension or just file name
+//    if (!have_extension) {
+//        //Passed file has no extension.We add it for you ?
+//        printf("Nao tem  extensao\n");
+//        file_name = (char *) malloc(sizeof(char) * strlen(fich_dat) + strlen(extension) + 1);
+//        strcpy(file_name, fich_dat);
+//        strcat(file_name, extension);
+//    } else {
+//        //Passed file has extension. All good to go ?
+//
+//        file_name = (char *) malloc(sizeof(char) * strlen(fich_dat) + 1);
+//        strcpy(file_name, fich_dat);
+//
+//    }
+//    FILE *ExpBD;
+//
+//    ExpBD = fopen(file_name, "rb");
+//    if (ExpBD == NULL) {
+//        printf("Erro!\n");
+//        exit(-1);
+//    }
+//    int nt = 0;
+//
+//    fread(BD->NOME_BDADOS, 50, 1, ExpBD);
+//    fread(BD->VERSAO_BDADOS, 50, 1, ExpBD);
+//    fread(&nt, sizeof(int), 1, ExpBD);
+//    printf("%s\n", BD->NOME_BDADOS);
+//    printf("%s\n", BD->VERSAO_BDADOS);
+//    printf("%d\n", nt);
+//
+//    char NomeTABELA[50];
+//    char LerCampos[200];
+//    char LerRegistos[50];
+//    int nCampos;
+//    int nRegistos;
+//    int nCharCampos;
+//    int nCharReg;
+//
+//    for (int ind_t = 0; ind_t < nt; ind_t++) {
+//        //fread(&nt,sizeof(int),1,ExpBD);
+//        fread(&nCampos, sizeof(int), 1, ExpBD);
+//        // printf("Li n Campos- %d\n",nt);
+//        printf("valor ncampos%d\n", nCampos);
+//        for (int i = 0; i < nCampos; i++) {
+//            CAMPO C;
+//            fread(&C, sizeof(CAMPO), 1, ExpBD);
+//            printf("Li tamanho campos - %s : %s\n", C.NOME_CAMPO, C.TIPO);
+//        }
+//    }
+//
+////    for (int i = 0; i < nt; i++) {
+////        fread(NomeTABELA,50,1,ExpBD);
+////        printf("%s\n", NomeTABELA);
+////        TABELA *nomeTb = Criar_Tabela(BD, NomeTABELA);
+////        fread( &nCampos,sizeof(int),1,ExpBD);
+////        printf("%d\n", nCampos);
+////
+////    for (int a = 0 ; a < nCampos; a++){
+////            fread( &nCharCampos,sizeof(int),1,ExpBD);
+////            fread(LerCampos,sizeof(nCharCampos),1,ExpBD);
+////            printf("%s\n",LerCampos);
+////            printf("%d , %d",a,nCampos);
+////       }
+////
+////       fread( &nRegistos,sizeof(int),1,ExpBD);
+////
+////        for (int b = 0; b < nRegistos; b++) {
+////            fread( &nCharReg,sizeof(int),1,ExpBD);
+////            fread(LerRegistos,sizeof(nCharReg),1,ExpBD);
+////            printf("%s\n",LerRegistos);
+////            printf("%d , %d",b,nRegistos);
+////        }
+////    }
+//    fclose(ExpBD);
+//    return SUCESSO;
+//}
 int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
 
     if (!BD) return INSUCESSO;
@@ -693,60 +832,57 @@ int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     }
     int nt = 0;
 
-    fread(BD->NOME_BDADOS, 50, 1, ExpBD);
-    fread(BD->VERSAO_BDADOS, 50, 1, ExpBD);
-    fread(&nt, sizeof(int), 1, ExpBD);
-    printf("%s\n", BD->NOME_BDADOS);
-    printf("%s\n", BD->VERSAO_BDADOS);
-    printf("%d\n", nt);
+    fread(BD->NOME_BDADOS,50,1,ExpBD);
+    fread(BD->VERSAO_BDADOS,50,1,ExpBD);
+    fread(&nt,sizeof(int),1,ExpBD);
+//    printf("%s\n", BD->NOME_BDADOS);
+//    printf("%s\n", BD->VERSAO_BDADOS);
+//    printf("%d\n", nt);
 
     char NomeTABELA[50];
-    char LerCampos[200];
     char LerRegistos[50];
     int nCampos;
     int nRegistos;
-    int nCharCampos;
     int nCharReg;
-
-    for (int ind_t = 0; ind_t < nt; ind_t++) {
-        //fread(&nt,sizeof(int),1,ExpBD);
-        fread(&nCampos, sizeof(int), 1, ExpBD);
-        // printf("Li n Campos- %d\n",nt);
-        printf("valor ncampos%d\n", nCampos);
-        for (int i = 0; i < nCampos; i++) {
+    int contaT;
+    for (int ind_t = 0; ind_t < nt; ind_t++)
+    {
+        fread(NomeTABELA,50,1,ExpBD);
+        TABELA *nomeTb = Criar_Tabela(BD, NomeTABELA);
+        fread(&nCampos,sizeof(int),1,ExpBD);
+        for(int i = 0; i < nCampos;i++){
             CAMPO C;
-            fread(&C, sizeof(CAMPO), 1, ExpBD);
-            printf("Li tamanho campos - %s : %s\n", C.NOME_CAMPO, C.TIPO);
+            fread(&C, sizeof(CAMPO),1,ExpBD);
+            Add_Campo_Tabela(nomeTb, C.NOME_CAMPO,C.TIPO );
+            printf("Li tamanho campos - %s : %s\n",C.NOME_CAMPO, C.TIPO);
+        }
+        fread( &nRegistos,sizeof(int),1,ExpBD);
+        contaT = nRegistos * nCampos;
+        int Pos = 0;
+        //Inicializa o buffer vazio
+        char BUFFER[100] = "";
+
+        for(int int_r = 0; int_r < contaT; int_r++){
+            Pos++;
+            fread(&nCharReg, sizeof(int),1,ExpBD);
+            fread(LerRegistos, sizeof(char),nCharReg,ExpBD);
+
+            /////////////////////////////////////////////////////////////////////////
+            strcat(BUFFER, LerRegistos);
+            strcat(BUFFER, ";");
+            printf("%s\n",BUFFER);
+            if(Pos == nCampos){
+                Add_Valores_Tabela(nomeTb, BUFFER);
+                printf("%s\n",BUFFER);
+                Pos = 0;
+                strcpy(BUFFER,"");
+            }
+            /////////////////////////////////////////////////////////////////////////
         }
     }
-
-//    for (int i = 0; i < nt; i++) {
-//        fread(NomeTABELA,50,1,ExpBD);
-//        printf("%s\n", NomeTABELA);
-//        TABELA *nomeTb = Criar_Tabela(BD, NomeTABELA);
-//        fread( &nCampos,sizeof(int),1,ExpBD);
-//        printf("%d\n", nCampos);
-//
-//    for (int a = 0 ; a < nCampos; a++){
-//            fread( &nCharCampos,sizeof(int),1,ExpBD);
-//            fread(LerCampos,sizeof(nCharCampos),1,ExpBD);
-//            printf("%s\n",LerCampos);
-//            printf("%d , %d",a,nCampos);
-//       }
-//
-//       fread( &nRegistos,sizeof(int),1,ExpBD);
-//
-//        for (int b = 0; b < nRegistos; b++) {
-//            fread( &nCharReg,sizeof(int),1,ExpBD);
-//            fread(LerRegistos,sizeof(nCharReg),1,ExpBD);
-//            printf("%s\n",LerRegistos);
-//            printf("%d , %d",b,nRegistos);
-//        }
-//    }
     fclose(ExpBD);
     return SUCESSO;
 }
-
 
 void destroy_info_string(void *info) {
     //this info is a string pointer

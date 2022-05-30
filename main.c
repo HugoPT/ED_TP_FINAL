@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ctype.h>
 #include "BDadosCoupe.h"
 
 
@@ -84,40 +85,36 @@ void showTableData(void *list) {
 }
 
 
+char *toUpper(char * temp) {
 
-
-char * splitString(char * inputString){
-    char *data = malloc(sizeof (char) * strlen(inputString) +1);
-    void  *containner = malloc(sizeof (void *) * 2);
-    strcpy(data,inputString);
-    char delimiter[] = "|";
-    char *p = strtok(data, delimiter);
-    int pos = 0;
-    while(p != NULL)
-    {
-        printf("'-----%s'\n", p);
-        containner[pos] = malloc(sizeof (char)* strlen(p)+1);
-        pos++;
-        p = strtok(NULL, delimiter);
-    }
-    printf("\n");
-    free(data);
-    return *containner;
+    return strupr (temp);
 }
-int main() {
-    //Instanciate BD
 
+int main() {
+
+    //buffer que o user vai escrever no menu
+//    char str[50 ];
+//    printf("Indique a opt");
+//    scanf("%s",str);
+//
+//    printf("Sai em upper case-%s", strupr(str));
+
+
+
+    //Instanciate BD
+   // string *bbb = splitString("OLA|Tudo");
     BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao-1.0");
-    Importar_BDados_Excel(BD, "new.csv");
-    Mostrar_BDados(BD);
+    //Importar_BDados_Excel(BD, "new.csv");
+   // Mostrar_BDados(BD);
 
     //Importar_BDados_Excel(BD, "EXPBD.csv");
     //Exportar_BDados_Excel(BD,"new.csv");
 
     //Destruir_BDados(BD);
 
-    //Exportar_BDados_Ficheiro_Binario(BD,"ab.dat");
-    //Importar_BDados_Ficheiro_Binario(BD,"ab.dat");
+   // Exportar_BDados_Ficheiro_Binario(BD,"ab.dat");
+    Importar_BDados_Ficheiro_Binario(BD,"ab.dat");
+    Mostrar_BDados(BD);
     //Importar_BDados_Excel(BD, "ExpBD.csv");
 
 //    char buffer[50];
