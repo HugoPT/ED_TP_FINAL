@@ -6,12 +6,17 @@
 int menu_principal() {
     int x;
     printf("\n\n# MENU PRINCIPAL ------------------------------------------#");
-    printf("\n| (1) Criar Tabela                    |");
-    printf("\n| (2) Mostrar Tabela   |");
-    printf("\n| (3) Adicionar campo tabela   |");
-    printf("\n| (3) Adicionar registos na tabela                 |");
-    printf("\n| (4) Exportar Tabela->CSV               |");
-
+    printf("\n| (1) Mostrar Base de Dados                                |");
+    printf("\n| (2) Criar Tabela                                         |");
+    printf("\n| (3) Mostrar Tabela                                       |");
+    printf("\n| (4) Adicionar Campo tabela                               |");
+    printf("\n| (5) Adicionar Registos tabela                            |");
+    printf("\n| (6) Select Registos                                      |");
+    printf("\n| (7) Update de Registos                                   |");
+    printf("\n| (8) Apagar Registos                                      |");
+    printf("\n| (9) Memoria total/desperdicada                           |");
+    printf("\n| (10) Exportar Base de Dados                              |");
+    printf("\n| (11) Importar Base de Dados                              |");
     printf("\n| -------------------------------------------------------- |");
     printf("\n|       (0) SAIR                                           |");
     printf("\n#----------------------------------------------------------#\n");
@@ -20,9 +25,10 @@ int menu_principal() {
         printf("\n  Qual a sua opcao ? ");
         fflush(stdin);
         scanf("%d", &x);
-    } while (x < 0 || x > 10);
+    } while (x < 0 || x > 11);
     return x;
 }
+
 
 //Delegate functions for print list fields
 void showTableFields(void *list) {
@@ -84,11 +90,351 @@ void showTableData(void *list) {
 
 }
 
-
-char *toUpper(char * temp) {
-
-    return strupr (temp);
+char *toUpper(char *temp) {
+    return strupr(temp);
 }
+
+
+//int main() {
+//    //Instanciate BD
+//    BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao-1.0");
+//
+////    char buffer[50];
+////    for (;;) {
+////        system("cls");
+////        menu_principal();
+////        switch (menu_principal()) {
+////            case 1:
+////                printf("%s\n", BD->NOME_BDADOS);
+////                printf("%s\n", BD->VERSAO_BDADOS);
+////                Mostrar_BDados(BD);
+////                break;
+////            case 2:
+////                printf("Qual o nome da tabela que deseja criar?\n");
+////                fflush(stdin);
+////                scanf("%s", buffer);
+////                Criar_Tabela(BD, strupr(buffer));
+////                system("cls");
+////                Mostrar_BDados(BD);
+////                break;
+////            case 3:
+////                printf("Qual tabela deseja pesquisar?\n");
+////                fflush(stdin);
+////                scanf("%s", buffer);
+////                TABELA *t = Pesquisar_Tabela(BD, strupr(buffer));
+////                Mostrar_Tabela(t);
+////                if (!t) {
+////                    printf("Tabela nao encontrada!\n");
+////                    break;
+////                }
+////                break;
+////            case 4:
+////                printf("Qual o nome da tabela onde deseja adicionar campos?\n");
+////                fflush(stdin);
+////                scanf("%s", buffer);
+////                TABELA *t2 = Pesquisar_Tabela(BD, strupr(buffer));
+////                if (!t2) {
+////                    printf("Tabela nao encontrada!\n");
+////                    break;
+////                }
+////                char data1[50];
+////                char data2[50];
+////                printf("Qual o nome do campo a adicionar?\n");
+////                fflush(stdin);
+////                scanf("%s", data1);
+////                printf("Qual o tipo de dados? criar? (INT) (STRING) (FLOAT)\n");
+////                fflush(stdin);
+////                scanf("%s", data2);
+////                Add_Campo_Tabela(t2, strupr(data1), strupr(data2));
+////                break;
+////            case 5:
+////                printf("Qual a tabela que pretende adicionar registos?\n");
+////                fflush(stdin);
+////                scanf("%s", buffer);
+////                TABELA *t3 = Pesquisar_Tabela(BD, strupr(buffer));
+////                if (!t3) {
+////                    printf("Tabela nao encontrada!");
+////                    break;
+////                }
+////                Mostrar_Tabela(t3);
+////                printf("Indique os dados separados por ; ?\n");
+////                fflush(stdin);
+////                scanf("%s", buffer);
+////                Add_Valores_Tabela(t3, strupr(buffer));
+////                Mostrar_Tabela(t3);
+////                break;
+////            case 6:
+////                printf("Qual a tabela que pretende?\n");
+////                fflush(stdin);
+////                scanf("%s", buffer);
+////                TABELA *t4 = Pesquisar_Tabela(BD, strupr(buffer));
+////                if (!t4) {
+////                    printf("Tabela nao encontrada!");
+////                    break;
+////                }
+////                Mostrar_Tabela(t4);
+////
+////                char ncampo[50];
+////                char valorcomparacao[50];
+////                int condicao;
+////                printf("Qual o Campo a filtrar?\n");
+////                fflush(stdin);
+////                scanf("%s", ncampo);
+////                printf("Qual o Valor a comparar?\n");
+////                fflush(stdin);
+////                scanf("%s", valorcomparacao);
+////                printf("Qual a condicao a aplicar?\n");
+////                printf("1- Menor que ||  2- Igual a || 3- Maior que\n");
+////                fflush(stdin);
+////                scanf("%d", &condicao);
+////                // Nested switch
+////                switch (condicao) {
+////                    case 1:
+////                        SELECT(BD, t4->NOME_TABELA, lessThen, ncampo, valorcomparacao);
+////                        break;
+////                    case 2:
+////                        SELECT(BD, t4->NOME_TABELA, equalMatch, ncampo, valorcomparacao);
+////                        break;
+////                    case 3:
+////                        SELECT(BD, t4->NOME_TABELA, greaterThen, ncampo, valorcomparacao);
+////                        break;
+////                    default:
+////                        printf("Erro!\n");
+////                        break;
+////                }
+////                break;
+////            case 7:
+////                printf("Qual a tabela que pretende?\n");
+////                fflush(stdin);
+////                scanf("%s", buffer);
+////                TABELA *t5 = Pesquisar_Tabela(BD, strupr(buffer));
+////                if (!t5) {
+////                    printf("Tabela nao encontrada!");
+////                    break;
+////                }
+////                Mostrar_Tabela(t5);
+////
+////                char ncampoup[50];
+////                char ncampoalt[50];
+////                char valorcomparacaoup[50];
+////                char novovalor[50];
+////                int condicaoo;
+////                printf("Indique um campo do registo que pretende alterar?\n");
+////                fflush(stdin);
+////                scanf("%s", ncampoup);
+////                printf("Qual o valor do registo nesse campo?\n");
+////                fflush(stdin);
+////                scanf("%s", valorcomparacaoup);
+////                printf("Qual a condicao a aplicar?\n");
+////                printf("1- Menor que ||  2- Igual a || 3- Maior que\n");
+////                fflush(stdin);
+////                scanf("%d", &condicaoo);
+////                printf("Indique que campo pretende alterar?\n");
+////                fflush(stdin);
+////                scanf("%s", ncampoalt);
+////                printf("Indique o novo valor do registo?\n");
+////                fflush(stdin);
+////                scanf("%s", novovalor);
+////                // Nested switch
+////                switch (condicaoo) {
+////                    case 1:
+////                        UPDATE(BD, t5->NOME_TABELA, lessThen, ncampoup, valorcomparacaoup, ncampoalt, novovalor);
+////                        break;
+////                    case 2:
+////                        UPDATE(BD, t5->NOME_TABELA, equalMatch, ncampoup, valorcomparacaoup, ncampoalt, novovalor);
+////                        break;
+////                    case 3:
+////                        UPDATE(BD, t5->NOME_TABELA, greaterThen, ncampoup, valorcomparacaoup, ncampoalt, novovalor);
+////                        break;
+////                    default:
+////                        printf("Erro!\n");
+////                        break;
+////                }
+////                break;
+////            case 8:
+////                printf("Qual a tabela que pretende?\n");
+////                fflush(stdin);
+////                scanf("%s", buffer);
+////                TABELA *t6 = Pesquisar_Tabela(BD, strupr(buffer));
+////                if (!t6) {
+////                    printf("Tabela nao encontrada!");
+////                    break;
+////                }
+////                Mostrar_Tabela(t6);
+////                char ncampodel[50];
+////                char valorcomparacaodel[50];
+////                int condicaooo;
+////                printf("Indique um Campo para filtrar registos?\n");
+////                fflush(stdin);
+////                scanf("%s", ncampodel);
+////                printf("Qual o Valor a filtrar?\n");
+////                fflush(stdin);
+////                scanf("%s", valorcomparacaodel);
+////                printf("Qual a condicao a aplicar?\n");
+////                printf("1- Menor que ||  2- Igual a || 3- Maior que\n");
+////                fflush(stdin);
+////                scanf("%d", &condicaooo);
+////                // Nested switch
+////                switch (condicaooo) {
+////                    case 1:
+////                        DELETE(BD, t6->NOME_TABELA, lessThen, ncampodel, valorcomparacaodel);
+////                        break;
+////                    case 2:
+////                        DELETE(BD, t6->NOME_TABELA, equalMatch, ncampodel, valorcomparacaodel);
+////                        break;
+////                    case 3:
+////                        DELETE(BD, t6->NOME_TABELA, greaterThen, ncampodel, valorcomparacaodel);
+////                        break;
+////                    default:
+////                        printf("Erro!\n");
+////                        break;
+////                }
+////                break;
+////            case 9:
+////                Memoria_BDados(BD);
+////                Memoria_Desperdicada_BDados(BD);
+////                break;
+////            case 10:
+////                printf("Escolha um tipo de ficheiro\n");
+////                printf("1- Exportar para fExcel || 2- Exportar para fBinario\n");
+////                fflush(stdin);
+////                int option;
+////                scanf("%d", &option);
+////                // Nested switch
+////                switch (option) {
+////                    case 1:
+////                        printf("Insira o nome do ficheiro a criar/atualizar\n");
+////                        fflush(stdin);
+////                        char ficheir_csv[50];
+////                        char extension[5] = ".csv";
+////                        char *file_name = NULL;
+////                        scanf("%s", ficheir_csv);
+////                        char *have_extension = strstr(ficheir_csv, ".csv");
+////                        //Handle file passed with extension or just file name
+////                        if (!have_extension) {
+////                            //Passed file has no extension.We add it for you :-)
+////                            printf("Nao tem  extensao, adicionando por si\n");
+////                            file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
+////                            strcpy(file_name, ficheir_csv);
+////                            strcat(file_name, extension);
+////                            free(file_name);
+////                        } else {
+////                            //Passed file has extension. All good to go :)
+////                            file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
+////                            strcpy(file_name, ficheir_csv);
+////                            free(file_name);
+////                        }
+////                        if (Exportar_BDados_Excel(BD, file_name)) {
+////                            printf("Exportado com Sucesso\n");
+////                        } else {
+////                            printf("Falha na exportacao para excel\n");
+////                        }
+////                        break;
+////                    case 2:
+////                        printf("Insira o nome do ficheiro a criar/atualizar\n");
+////                        fflush(stdin);
+////                        char fich_dat[50];
+////                        char extensiondat[5] = ".dat";
+////                        char *file_namedat = NULL;
+////                        scanf("%s", fich_dat);
+////                        char *have_extensiondat = strstr(fich_dat, ".dat");
+////                        //Handle file passed with extension or just file name
+////                        if (!have_extensiondat) {
+////                            //Passed file has no extension.We add it for you :-)
+////                            printf("Nao tem  extensao, adicionando por si\n");
+////                            file_namedat = (char *) malloc(sizeof(char) * strlen(fich_dat) + strlen(extensiondat) + 1);
+////                            strcpy(file_namedat, fich_dat);
+////                            strcat(file_namedat, extensiondat);
+////                        } else {
+////                            //Passed file has extension. All good to go :)
+////                            file_namedat = (char *) malloc(sizeof(char) * strlen(fich_dat) + 1);
+////                            strcpy(file_namedat, fich_dat);
+////                        }
+////                        if (Exportar_BDados_Ficheiro_Binario(BD, file_namedat)) {
+////                            printf("Exportado com Sucesso\n");
+////                        } else {
+////                            printf("Falha na exportacao para excel\n");
+////                        }
+////                        break;
+////                    default:
+////                        printf("Erro!\n");
+////                        break;
+////                }
+////                break;
+////            case 11:
+////                printf("Escolha um tipo de ficheiro\n");
+////                printf("1- Importar de fExcel || 2- Importar de fBinario\n");
+////                fflush(stdin);
+////                int opcaoo;
+////                scanf("%d", &opcaoo);
+////                // Nested switch
+////                switch (opcaoo) {
+////                    case 1:
+////                        printf("Insira o nome do ficheiro a importar\n");
+////                        fflush(stdin);
+////                        char ficheir_csv[50];
+////                        char extension[5] = ".csv";
+////                        char *file_name = NULL;
+////                        scanf("%s", ficheir_csv);
+////                        char *have_extension = strstr(ficheir_csv, ".csv");
+////                        //Handle file passed with extension or just file name
+////                        if (!have_extension) {
+////                            //Passed file has no extension.We add it for you :-)
+////                            printf("Nao tem  extensao, adicionando por si\n");
+////                            file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
+////                            strcpy(file_name, ficheir_csv);
+////                            strcat(file_name, extension);
+////                        } else {
+////                            //Passed file has extension. All good to go :)
+////                            file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
+////                            strcpy(file_name, ficheir_csv);
+////                        }
+////                        if (Importar_BDados_Excel(BD, file_name)) {
+////                            printf("Importado com Sucesso, Mostrando BD\n");
+////                            Mostrar_BDados(BD);
+////                        }
+////                        free(file_name);
+////                        break;
+////                    case 2:
+////                        printf("Insira o nome do ficheiro a importar\n");
+////                        fflush(stdin);
+////                        char ficheir_dat[50];
+////                        char extensiondat[5] = ".dat";
+////                        char *fich_dat = NULL;
+////                        scanf("%s", ficheir_dat);
+////                        char *have_extensiondat = strstr(ficheir_dat, ".dat");
+////                        //Handle file passed with extension or just file name
+////                        if (!have_extensiondat) {
+////                            //Passed file has no extension.We add it for you :-)
+////                            printf("Nao tem  extensao, adicionando por si\n");
+////                            fich_dat = (char *) malloc(sizeof(char) * strlen(ficheir_dat) + strlen(extensiondat) + 1);
+////                            strcpy(fich_dat, ficheir_dat);
+////                            strcat(fich_dat, extensiondat);
+////                        } else {
+////                            //Passed file has extension. All good to go :)
+////                            fich_dat = (char *) malloc(sizeof(char) * strlen(ficheir_dat) + 1);
+////                            strcpy(fich_dat, ficheir_dat);
+////                        }
+////                        printf("fichdat: %s", fich_dat);
+////                        if (Importar_BDados_Ficheiro_Binario(BD, fich_dat)) {
+////                            printf("Importado com Sucesso, Mostrando BD\n");
+////                            Mostrar_BDados(BD);
+////                        }
+////                        free(fich_dat);
+////                        break;
+////                    default:
+////                        printf("Erro\n");
+////                        break;
+////                }
+////                break;
+////            case 0:
+////                Destruir_BDados(BD);
+////                exit(0);    // Fim do Programa
+////                break;
+////        } // END switch (menu_principal())
+////        system("pause");
+////    }
+//}
 
 int main() {
 
@@ -103,7 +449,7 @@ int main() {
 
     //Instanciate BD
    // string *bbb = splitString("OLA|Tudo");
-    BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao-1.0");
+
     //Importar_BDados_Excel(BD, "new.csv");
    // Mostrar_BDados(BD);
 
@@ -113,86 +459,15 @@ int main() {
     //Destruir_BDados(BD);
 
    // Exportar_BDados_Ficheiro_Binario(BD,"ab.dat");
-    Importar_BDados_Ficheiro_Binario(BD,"ab.dat");
-    Mostrar_BDados(BD);
-    //Importar_BDados_Excel(BD, "ExpBD.csv");
+   // Importar_BDados_Ficheiro_Binario(BD,"ab.dat");
+   // Mostrar_BDados(BD);
+    //Exportar_Tabela_BDados_Excel(BD,"CLIENTES","asdasdas.csv");
 
-//    char buffer[50];
-//    for (;;) {
-//        system("cls");
-//        switch (menu_principal()) {
-//            case 1:
-//                printf("Qual o nome da tabela que deseja criar?\n");
-//                fflush(stdin);
-//                scanf("%s", buffer);
-//
-//                Criar_Tabela(BD, buffer);
-//                Mostrar_BDados(BD);
-//                break;
-//            case 2:
-//                Mostrar_BDados(BD);
-//                break;
-//            case 3:
-//                printf("Qual o nome da tabela que adicionar campos? criar?\n");
-//                fflush(stdin);
-//                scanf("%s", buffer);
-//                TABELA *t = Pesquisar_Tabela(BD, buffer);
-//                if (!t) {
-//                    printf("Tabela nao encontrada!!!\n");
-//                    break;
-//                }
-//                char data1[50];
-//                char data2[50];
-//                printf("Qual o nome do campos? criar?\n");
-//                fflush(stdin);
-//                scanf("%s", data1);
-//                printf("Qual o tipo de dados? criar? (INT) (STRING) (FLOAT)\n");
-//                fflush(stdin);
-//                scanf("%s", data2);
-//                Add_Campo_Tabela(t, data1, data2);
-//                break;
-//            case 4:
-//                printf("Qual a tabela que prentende adicionar registos?\n");
-//                fflush(stdin);
-//                scanf("%s", buffer);
-//                TABELA *t2 = Pesquisar_Tabela(BD, buffer);
-//                if (!t2) {
-//                    printf("Tabela nao encontrada");
-//                    break;
-//                }
-//                Mostrar_Tabela(t2);
-//                printf("Indique os dados separados por ; ?\n");
-//                fflush(stdin);
-//                scanf("%s", buffer);
-//                Add_Valores_Tabela(t2, buffer);
-//                Mostrar_Tabela(t2);
-//                break;
-//                break;
-//            case 5:
-//                SELECT(BD, "MORADAS", equalMatch, "LOCALIDADE", "RuaViseu");
-//                break;
-//            case 6:
-//                printf("opca6\n");
-//                break;
-//            case 7:
-//                printf("opcao7\n");
-//                break;
-//            case 8:
-//                printf("opcao8\n");
-//                break;
-//            case 9:
-//                printf("opcao9\n");
-//                break;
-//            case 10:  // para facilitar os testes
-//                printf("opcao10\n");
-//                break;
-//            case 0:
-//                Destruir_BDados(BD);
-//                exit(0);    // Fim do Programa
-//                break;
-//        } //END switch (menu_principal())
-//        //system("pause");1
-//    }
+
+    BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao-1.0");
+    Importar_BDados_Excel(BD, "a.csv");
+
+
 
 
 //    //Create Table for Clients
@@ -232,7 +507,7 @@ int main() {
     Add_Valores_Tabela(cidades, "3;Evora");
     //Exportar_BDados_Excel(BD,"new.csv");
 
-    */
+
     //Add_Valores_Tabela_BDados(BD, "CIDADES", "4;Porto");
 //
 //    //Show List with user delegate function
@@ -242,7 +517,7 @@ int main() {
     // MostrarLG(cidades->LCampos, showTableFields);
     //MostrarLG(cidades->LRegistos, showTableData);
 
-
+*/
 //
 //    //Show List with user delegate function
 //    // MostrarLG(moradas->LCampos, showTableFields);
@@ -309,21 +584,25 @@ int main() {
 // SELECT(BD, "MORADAS", greaterThen, "ID", "3");
     //Exportar_BDados_Excel(BD,"ExpBD.csv");
 
-    //Mostrar_BDados(BD);
+    Mostrar_BDados(BD);
 
+    //Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
+
+   // SELECT(BD, "CLIENTES", greaterThen, "ID", "1");
+    //Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
+    //UPDATE(BD,"CLIENTES",equalMatch,"ID","2","NOME","AndreFilipe");
     Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
-
-    SELECT(BD, "CLIENTES", lessThen, "ID", "3");
-    //UPDATE(BD,"CLIENTES",lessThen,"ID","2","NOME","AndreFilipe");
-    //DELETE(BD,"CLIENTES",lessThen,"ID","3");
-
+    DELETE(BD,"CLIENTES",equalMatch,"ID","4");
+    Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
+   // Mostrar_BDados(BD);
 //    Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
 //    Add_Valores_Tabela(Pesquisar_Tabela(BD,"CLIENTES"), "3;Paulo;22");
 //    Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
     //Mostrar_BDados(BD);
-    Destruir_BDados(BD);
+    //Destruir_BDados(BD);
 
     // Memoria_Desperdicada_BDados(BD);
+    Destruir_BDados(BD);
 
     return 0;
 }
