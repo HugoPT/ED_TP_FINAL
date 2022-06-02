@@ -1,9 +1,5 @@
-
 #include <stdint.h>
-#include <ctype.h>
 #include <time.h>
-
-
 #include "BDadosCoupe.h"
 
 #define FIXED_SIZE_ARRAY 50L
@@ -13,14 +9,11 @@
 
 /** \brief Criar_BDados: A) Criar a Base de dados
  *
- * \param nome_bd char* : Nome da Base de Dados
- * \param versao char*  : Versão da Base de Dados
- * \return BDadosCoupe* : Ponteiro para a Base de Dados Criada
+ * \param nome_bd char* : DB name
+ * \param versao char*  : DB version
+ * \return BDadosCoupe* : Pointer to created database
  *
  */
-
-
-
 BDadosCoupe *Criar_BDados(char *nome_bd, char *versao) {
     BDadosCoupe *BD = (BDadosCoupe *) malloc(sizeof(BDadosCoupe));
     strcpy(BD->NOME_BDADOS, nome_bd);
@@ -29,17 +22,16 @@ BDadosCoupe *Criar_BDados(char *nome_bd, char *versao) {
     return BD;
 }
 
-/** \brief B) Criar uma Tabela na Base de Dados,
- * a tabela deve ser inserida à lista de tabelas da BD
+/** \brief B) Creates a table inside DB
  *
- * \param BD BDadosCoupe* : Ponteiro para a Base de Dados
- * \param nome_tabela char* : Nome da tabela a Criar
- * \return TABELA*        : Retorna a Tabela Criada
- * \author                : CS, FM & JL
+ * \param BD BDadosCoupe* : Pointer to database
+ * \param nome_tabela char* : table name
+ * \return TABELA*        : Returns a pointer to the created table.
+ * \author                :  AS,HS,PC
  */
 TABELA *Criar_Tabela(BDadosCoupe *BD, char *nome_tabela) {
     TABELA *table = (TABELA *) malloc(sizeof(TABELA));
-//The table name is converted to UPPERCASE
+    //The table name is converted to UPPERCASE for normalize user input
     strcpy(table->NOME_TABELA, strupr(nome_tabela));
     table->LCampos = CriarLG();
     table->LRegistos = CriarLG();
@@ -47,15 +39,12 @@ TABELA *Criar_Tabela(BDadosCoupe *BD, char *nome_tabela) {
     return table;
 }
 
-/** \brief C)  Adicionar um campo a uma tabela.
+/** \brief   Add a field to the table
  *
- * \param T TABELA* : Ponteiro para a tabela
- * \param nome_campo char* : Nome do campo
- * \param tipo_campo char* : Tipo do Campo (INT, STRING, CHAR, FLOAT)
- * \return int             : SUCESSO/INSUCESSO
- * \author                 : CS, FM & JL              :
- * \version                : Versao 1.0
- * \date                   : 23/04/2022
+ * \param T TABELA* : Table Pointer
+ * \param nome_campo char* : Field name
+ * \param tipo_campo char* : Field type (INT, STRING, CHAR, FLOAT)
+ * \return int             : Returns SUCESSO/INSUCESSO
  */
 int Add_Campo_Tabela(TABELA *T, char *nome_campo, char *tipo_campo) {
     if (!T) return INSUCESSO;
@@ -65,10 +54,13 @@ int Add_Campo_Tabela(TABELA *T, char *nome_campo, char *tipo_campo) {
     return AddLG(T->LCampos, campo);
 }
 
-//D)	Adicionar dados(registos) a uma tabela, os dados são dados numa string onde o separador é ‘;’m ex: Add_Valores_Tabela(T, “123;Joao;965654449”)
+/**
+ * \brief Add a new value to the table
+ * @param T - Pointer table
+ * @param dados: - String of data splitted with; ex 1;car;volvo
+ * @return   : Returns SUCESSO/INSUCESSO
+ */
 int Add_Valores_Tabela(TABELA *T, char *dados) {
-
-
     if (!T)return INSUCESSO;
     if (dados) {
         char *tmp = (char *) malloc(sizeof(char) * (strlen(dados) + 1));
@@ -86,9 +78,7 @@ int Add_Valores_Tabela(TABELA *T, char *dados) {
         free(tmp);
         return SUCESSO;
     }
-
     return INSUCESSO;
-
 }
 
 
@@ -100,9 +90,6 @@ int Add_Valores_Tabela(TABELA *T, char *dados) {
  * @return : SUCESSO - Case of success\n
  *          :INSUCESSO - Case of fail
  */
-
-
-
 int Add_Valores_Tabela_BDados(BDadosCoupe *BD, char *nome_tabela, char *dados) {
     if (!BD)return INSUCESSO;
     if (!nome_tabela)return INSUCESSO;
@@ -117,19 +104,26 @@ int Add_Valores_Tabela_BDados(BDadosCoupe *BD, char *nome_tabela, char *dados) {
     return INSUCESSO;
 }
 
-//F)	Pesquisar uma Tabela da base de dados
+/**
+ * \brief: Search a table
+ * @param BD : Database name
+ * @param nome_tabela : Name of the table to search
+ *  @return : Table pointer - Case of success found\n
+ *          :NULL - Case of fail
+ */
 TABELA *Pesquisar_Tabela(BDadosCoupe *BD, char *nome_tabela) {
     if (!BD)return NULL;
+    //Guard nome_tabela with at least one caracter
     if (strlen(nome_tabela) < 1) {
         printf("Nome da tabela invalido.Indique o nome da tabela!\n");
         return NULL;
     }
-    //Iterate the list
+    //Iterate the list searching the table
     if (BD->LTabelas->NEL) {
         NOG *n = BD->LTabelas->Inicio;
         while (n) {
             TABELA *t = (TABELA *) n->Info;
-            // printf("%s\n",t->NOME_TABELA);
+            //Compare the name
             if (strcmp(nome_tabela, t->NOME_TABELA) == 0)return t;
             n = n->Prox;
         }
@@ -138,7 +132,11 @@ TABELA *Pesquisar_Tabela(BDadosCoupe *BD, char *nome_tabela) {
     return NULL;
 }
 
-//G)	Mostrar uma Tabela
+/**
+ * \brief Shows to the user the content of the table
+ * @param BD : Database name
+ * @param tabela : Pointer for a table to print
+ */
 void Mostrar_Tabela_NOME(BDadosCoupe *BD, char *tabela) {
     if (!BD)return;
     if (strlen(tabela) < 1) {
@@ -151,9 +149,13 @@ void Mostrar_Tabela_NOME(BDadosCoupe *BD, char *tabela) {
     }
 }
 
+/**
+ * \brief Show a table
+ * @param T :Pointer for a table to print
+ */
 void Mostrar_Tabela(TABELA *T) {
     if (!T) return;
-    //if (!T->LCampos->NEL)return;
+    //Print the hear
     printf("------------Tabela [%s]------------\n", T->NOME_TABELA);
     NOG *n = T->LCampos->Inicio;
     while (n) {
@@ -162,8 +164,7 @@ void Mostrar_Tabela(TABELA *T) {
         n = n->Prox;
     }
     printf("\n");
-
-
+    //Print the body content
     NOG *registerListNode = T->LRegistos->Inicio;
     while (registerListNode) {
         ListaGenerica *ab = registerListNode->Info;
@@ -175,10 +176,13 @@ void Mostrar_Tabela(TABELA *T) {
         printf("\n");
         registerListNode = registerListNode->Prox;
     }
-    printf("-----[A tabela contem %d registos]-----\n\n", T->LRegistos->NEL);
+    printf("-----[A tabela contem %d registo(s)]-----\n\n", T->LRegistos->NEL);
 }
 
-//H)	Mostrar toda a base de dados, deverá mostrar todas as Tabelas da BDados.
+/**
+ * \brief: Shows all the tables inside the database
+ * @param BD :pointer to the database
+ */
 void Mostrar_BDados(BDadosCoupe *BD) {
     if (!BD)return;
     ListaGenerica *head = (ListaGenerica *) BD->LTabelas;
@@ -190,13 +194,15 @@ void Mostrar_BDados(BDadosCoupe *BD) {
     }
 }
 
-//I)	Libertar toda a memória alocada pela base de dados.
+/**
+ * \brief : Remove all content and dealoc the database
+ * @param BD :pointer to the database
+ */
 void Destruir_BDados(BDadosCoupe *BD) {
     if (!BD)return;
     if (BD->LTabelas->NEL > 0) {
         while (BD->LTabelas->NEL) {
             TABELA *inicio = BD->LTabelas->Inicio->Info;
-            //printf(" Destruindo %s\n", inicio->NOME_TABELA);
             DROP_TABLE(BD, inicio->NOME_TABELA);
         }
     }
@@ -209,17 +215,18 @@ void Destruir_BDados(BDadosCoupe *BD) {
 
 }
 
-//J)	Memória ocupada por toda a base de dados.
-//J)	Memória ocupada por toda a base de dados.
-//J)	Memória ocupada por toda a base de dados.
+/**
+ * \brief: Shows how much memory the intire DB ocupies in BYTES
+ * @param BD :pointer to the database
+ * @return Bytes count
+ */
 long int Memoria_BDados(BDadosCoupe *BD) {
     if (!BD) return -1;
     long total_memory = 0;
-    //Total memory used in BD 112Bytes
     total_memory += sizeof(BDadosCoupe);
     ListaGenerica *tabelas = (ListaGenerica *) BD->LTabelas;
     NOG *node = tabelas->Inicio;
-    //Iterates Table list
+    //Iterate Table list
     while (node) {
         TABELA *t = (TABELA *) node->Info;
         total_memory += FIXED_SIZE_ARRAY + sizeof(NOG) + 2 * POINTERSIZE; // Tablename+Node+2 pointers to list
@@ -252,6 +259,11 @@ long int Memoria_BDados(BDadosCoupe *BD) {
     return total_memory;
 }
 
+/**
+ * \brief Shows the wasted memory caused by fixed array size inside some structs
+ * @param BD :pointer to the database
+ * @return Bytes count of wasted memory
+ */
 long int Memoria_Desperdicada_BDados(BDadosCoupe *BD) {
     if (!BD) return -1;
     long wasted_memory = 0;
@@ -265,7 +277,8 @@ long int Memoria_Desperdicada_BDados(BDadosCoupe *BD) {
         TABELA *t = (TABELA *) node->Info;
         wasted_memory += (FIXED_SIZE_ARRAY - (strlen(t->NOME_TABELA) + 1));  // cada tabela tem o nome a 50
         NOG *node_LCampos = t->LCampos->Inicio;
-        while (node_LCampos) {  // Iterar os campos
+        // Iterate the fields
+        while (node_LCampos) {
             CAMPO *c = (CAMPO *) node_LCampos->Info;
             wasted_memory += (10 - (strlen(c->TIPO) + 1));
             wasted_memory += (FIXED_SIZE_ARRAY - (strlen(c->NOME_CAMPO) + 1));
@@ -277,7 +290,14 @@ long int Memoria_Desperdicada_BDados(BDadosCoupe *BD) {
     return wasted_memory;
 }
 
-//K)	Exportar/Importar para/de Ficheiro (o retorno destas funções, permite saber se a função foi bem/mal-executada!):
+
+/**
+ * \brief : Export the table to CSV file
+ * @param BD :Pointer to BD
+ * @param tabela :Pointer to a table to export
+ * @param ficheir_csv : file to export.Extension is added automaticly in case of missing
+ * @return SUCESSO or INSUCESSO for the state of the import
+ */
 int Exportar_Tabela_BDados_Excel(BDadosCoupe *BD, char *tabela, char *ficheir_csv) {
     if (!BD) return -1;
     if (!tabela) return -1;
@@ -339,15 +359,17 @@ int Exportar_Tabela_BDados_Excel(BDadosCoupe *BD, char *tabela, char *ficheir_cs
     return INSUCESSO;
 }
 
-
+/**
+ * \brief : Export the intire DB to CSV File
+ * @param BD :Pointer to BD
+ * @param ficheir_csv : file to export.Extension is added automaticly in case of missing
+ * @return SUCESSO or INSUCESSO for the state of the import
+ */
 int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     if (!BD) return -1;
     if (!ficheir_csv) return -1;
 
-    int i = 0;
     FILE *ExpBD;
-
-
     char extension[5] = ".csv";
     char *file_name = NULL;
     scanf("%s", ficheir_csv);
@@ -404,7 +426,12 @@ int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     free(file_name);
     return INSUCESSO;
 }
-
+/**
+ * \brief Function to store execution performance statistics and log.Saves the statistics in \n statistics.csv
+ * @param FunctionName :Name of the function to cron
+ * @param start :Start timestampo
+ * @param end :End timestamp
+ */
 void Time(const char *FunctionName, clock_t start, clock_t end) {
     FILE *Time;
     time_t t = time(NULL);
@@ -414,7 +441,6 @@ void Time(const char *FunctionName, clock_t start, clock_t end) {
     fprintf(Time, "%d-%02d-%02d %02d:%02d:%02d %s:%fms\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour,
             tm.tm_min, tm.tm_sec, FunctionName, time_spent);
     fclose(Time);
-
 }
 
 
@@ -425,22 +451,26 @@ char *scan(char **pp, char c) {
     *pp = p;
     return s;
 }
-
+//Typedef alias to string
 typedef char *string;
-
+/**
+ * \brief Split a string with a ;
+ * @param inputString :String yo split
+ * @return : Returns an array with 2 string elements splited by the ;
+ */
 string *splitString(const char *inputString) {
     char *copy_string = malloc(sizeof(char) * strlen(inputString) + 1);
-    string *containner = (string *) malloc(sizeof(string) * 2);
+    string *container = (string *) malloc(sizeof(string) * 2);
     strcpy(copy_string, inputString);
     char delimiter[] = "|";
     int pos = 0;
     char *p = copy_string;
     while (p) {
-        containner[pos] = (char *) malloc(sizeof(char) * (strlen(p) + 1));
-        strcpy(containner[pos++], scan(&p, '|'));
+        container[pos] = (char *) malloc(sizeof(char) * (strlen(p) + 1));
+        strcpy(container[pos++], scan(&p, '|'));
     }
     free(copy_string);
-    return containner;
+    return container;
 }
 
 
@@ -503,6 +533,7 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
             data = strtok(NULL, ";");
             string *parts = splitString(registo);
             Add_Campo_Tabela(nomeTb, parts[0], parts[1]);
+            free(parts);
             free(registo);
         }
         free(tmp);

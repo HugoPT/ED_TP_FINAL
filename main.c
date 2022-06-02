@@ -109,6 +109,7 @@ void showTableData(void *list) {
 }
 
 int main() {
+
     //Instanciate BD
     BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao-1.0");
 
@@ -148,7 +149,6 @@ int main() {
                     printf("Tabela nao encontrada!\n");
                     break;
                 }
-                //t=NULL;
                 break;
             case 4:
                 printf("Qual o nome da tabela onde deseja adicionar campos?\n");
@@ -166,7 +166,7 @@ int main() {
                 fflush(stdin);
                 scanf("%s", user_input_buffer2);
                 Add_Campo_Tabela(t, user_input_buffer1, user_input_buffer2);
-                //t=NULL;
+
                 break;
             case 5:
                 printf("Qual a tabela que pretende adicionar registos?\n");
@@ -183,7 +183,7 @@ int main() {
                 scanf("%s", user_input_buffer1);
                 Add_Valores_Tabela(t, user_input_buffer1);
                 Mostrar_Tabela(t);
-                //t=NULL;
+
                 break;
             case 6:
                 showTableHeader(BD->LTabelas);
@@ -198,7 +198,6 @@ int main() {
                 }
                 Mostrar_Tabela(t);
 
-                int condicao;
                 printf("Qual o Campo a filtrar?\n");
                 fflush(stdin);
                 scanf("%s", strupr(user_input_buffer1));
@@ -256,18 +255,19 @@ int main() {
                 printf("Indique o novo valor do registo?\n");
                 fflush(stdin);
                 scanf("%s", user_input_buffer4);
-
-                printf("%s-----",user_input_buffer2);
                 // Nested switch
                 switch (condicao) {
                     case 1:
-                        UPDATE(BD, t->NOME_TABELA, lessThen, strupr(user_input_buffer1), user_input_buffer3, strupr(user_input_buffer2), user_input_buffer4);
+                        UPDATE(BD, t->NOME_TABELA, lessThen, strupr(user_input_buffer1), user_input_buffer3,
+                               strupr(user_input_buffer2), user_input_buffer4);
                         break;
                     case 2:
-                        UPDATE(BD, t->NOME_TABELA, equalMatch, strupr(user_input_buffer1), user_input_buffer3, strupr(user_input_buffer2), user_input_buffer4);
+                        UPDATE(BD, t->NOME_TABELA, equalMatch, strupr(user_input_buffer1), user_input_buffer3,
+                               strupr(user_input_buffer2), user_input_buffer4);
                         break;
                     case 3:
-                        UPDATE(BD, t->NOME_TABELA, greaterThen, strupr(user_input_buffer1), user_input_buffer3, strupr(user_input_buffer2), user_input_buffer4);
+                        UPDATE(BD, t->NOME_TABELA, greaterThen, strupr(user_input_buffer1), user_input_buffer3,
+                               strupr(user_input_buffer2), user_input_buffer4);
                         break;
                     default:
                         printf("Erro!\n");
@@ -319,7 +319,7 @@ int main() {
                 printf("Escolha um tipo de ficheiro\n");
                 printf("1- Exportar para fExcel || 2- Exportar para fBinario\n");
                 fflush(stdin);
-               // int option;
+                // int option;
                 scanf("%d", &condicao);
                 // Nested switch
                 switch (condicao) {
@@ -327,15 +327,23 @@ int main() {
                         printf("Insira o nome do ficheiro a criar/atualizar\n");
                         fflush(stdin);
                         scanf("%s", user_input_buffer1);
-                        Exportar_BDados_Excel(BD, user_input_buffer1);
-                        printf("Exportado com Sucesso\n");
+                        if (Exportar_BDados_Excel(BD, user_input_buffer1)) {
+                            printf("Exportado com Sucesso\n");
+                        } else {
+                            printf("Erro ao exportar !!!\n");
+                        }
+
                         break;
                     case 2:
                         printf("Insira o nome do ficheiro a criar/atualizar\n");
                         fflush(stdin);
                         scanf("%s", user_input_buffer1);
-                        Exportar_BDados_Ficheiro_Binario(BD, user_input_buffer1);
-                        printf("Exportado com Sucesso\n");
+                        if (Exportar_BDados_Ficheiro_Binario(BD, user_input_buffer1)) {
+                            printf("Exportado com Sucesso\n");
+                        } else {
+                            printf("Erro ao exportar !!!\n");
+                        }
+
                         break;
                     default:
                         printf("Erro!\n");
@@ -353,19 +361,20 @@ int main() {
                         printf("Insira o nome do ficheiro a importar\n");
                         fflush(stdin);
                         scanf("%s", user_input_buffer1);
-                        if(Importar_BDados_Excel(BD, user_input_buffer1)){
+                        if (Importar_BDados_Excel(BD, user_input_buffer1)) {
                             printf("Importado com Sucesso, Mostrando BD\n");
                             Mostrar_BDados(BD);
                         }
-
                         break;
                     case 2:
                         printf("Insira o nome do ficheiro a importar\n");
                         fflush(stdin);
                         scanf("%s", user_input_buffer1);
-                        Importar_BDados_Ficheiro_Binario(BD, user_input_buffer1);
-                        printf("Importado com Sucesso, Mostrando BD\n");
-                        Mostrar_BDados(BD);
+                        if (Importar_BDados_Ficheiro_Binario(BD, user_input_buffer1)) {
+                            printf("Importado com Sucesso, Mostrando BD\n");
+                            Mostrar_BDados(BD);
+                        }
+
                         break;
                     default:
                         printf("Erro\n");
@@ -376,13 +385,13 @@ int main() {
                 showTableHeader(BD->LTabelas);
                 printf("Escolha a tabela que pretende exportar\n");
                 fflush(stdin);
-
                 scanf("%s", user_input_buffer1);
                 fflush(stdin);
                 printf("Qual o nome do ficheiro a exportar?\n");
                 scanf("%s", user_input_buffer2);
-                Exportar_Tabela_BDados_Excel(BD, strupr(user_input_buffer1), user_input_buffer2);
-
+                if (Exportar_Tabela_BDados_Excel(BD, strupr(user_input_buffer1), user_input_buffer2)) {
+                    printf("Exportado com Sucesso, Mostrando BD\n");
+                }
                 break;
             case 0:
                 Destruir_BDados(BD);
