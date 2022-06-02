@@ -283,8 +283,24 @@ int Exportar_Tabela_BDados_Excel(BDadosCoupe *BD, char *tabela, char *ficheir_cs
     if (!tabela) return -1;
     if (!ficheir_csv) return -1;
 
+    char extension[5] = ".csv";
+    char *file_name = NULL;
+
+    char *have_extension = strstr(ficheir_csv, ".csv");
+    //Handle file passed with extension or just file name
+    if (!have_extension) {
+        //Passed file has no extension.We add it for you :-)
+        printf("Nao tem  extensao, adicionando por si\n");
+        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
+        strcpy(file_name, ficheir_csv);
+        strcat(file_name, extension);
+    } else {
+        //Passed file has extension. All good to go :)
+        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
+        strcpy(file_name, ficheir_csv);
+    }
     FILE *ExpBD;
-    ExpBD = fopen(ficheir_csv, "w");
+    ExpBD = fopen(file_name, "w");
     if (ExpBD) {
         TABELA *t = Pesquisar_Tabela(BD, tabela);
         if (t) {
@@ -310,13 +326,16 @@ int Exportar_Tabela_BDados_Excel(BDadosCoupe *BD, char *tabela, char *ficheir_cs
                 Aux = Aux->Prox;
             }
             fclose(ExpBD);
+            free(file_name);
             return SUCESSO;
         }
         printf("Esta tabela nao existe !!!\n");
         fclose(ExpBD);
+        free(file_name);
         return INSUCESSO;
     }
     printf("Nao foi possivel escrever esse ficheiro\n");
+    free(file_name);
     return INSUCESSO;
 }
 
@@ -327,7 +346,26 @@ int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
 
     int i = 0;
     FILE *ExpBD;
-    ExpBD = fopen(ficheir_csv, "w");
+
+
+    char extension[5] = ".csv";
+    char *file_name = NULL;
+    scanf("%s", ficheir_csv);
+    char *have_extension = strstr(ficheir_csv, ".csv");
+    //Handle file passed with extension or just file name
+    if (!have_extension) {
+        //Passed file has no extension.We add it for you :-)
+        printf("Nao tem  extensao, adicionando por si\n");
+        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
+        strcpy(file_name, ficheir_csv);
+        strcat(file_name, extension);
+    } else {
+        //Passed file has extension. All good to go :)
+        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
+        strcpy(file_name, ficheir_csv);
+    }
+
+    ExpBD = fopen(file_name, "w");
     if (ExpBD) {
         NOG *n = BD->LTabelas->Inicio;
         fprintf(ExpBD, "%s\n", BD->NOME_BDADOS);
@@ -360,8 +398,10 @@ int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
             fprintf(ExpBD, "\n");
         }
         fclose(ExpBD);
+        free(file_name);
         return SUCESSO;
     }
+    free(file_name);
     return INSUCESSO;
 }
 
@@ -410,7 +450,24 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
 
     FILE *ExpBD;
 
-    ExpBD = fopen(ficheir_csv, "r");
+    char extension[5] = ".csv";
+    char *file_name = NULL;
+    scanf("%s", ficheir_csv);
+    char *have_extension = strstr(ficheir_csv, ".csv");
+    //Handle file passed with extension or just file name
+    if (!have_extension) {
+        //Passed file has no extension.We add it for you :-)
+        printf("Nao tem  extensao, adicionando por si\n");
+        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
+        strcpy(file_name, ficheir_csv);
+        strcat(file_name, extension);
+    } else {
+        //Passed file has extension. All good to go :)
+        file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
+        strcpy(file_name, ficheir_csv);
+    }
+
+    ExpBD = fopen(file_name, "r");
     if (ExpBD == NULL) {
         printf("Erro!\n");
         return INSUCESSO;
@@ -460,6 +517,7 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     }
 
     fclose(ExpBD);
+    free(file_name);
     return SUCESSO;
 }
 
@@ -474,11 +532,25 @@ int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     if (!BD) return -1;
     if (!fich_dat) return -1;
 
-    int i = 0;
-
+    //int i = 0;
+    char extensiondat[5] = ".dat";
+    char *file_namedat = NULL;
+    char *have_extensiondat = strstr(fich_dat, ".dat");
+    //Handle file passed with extension or just file name
+    if (!have_extensiondat) {
+        //Passed file has no extension.We add it for you :-)
+        printf("Nao tem  extensao, adicionando por si\n");
+        file_namedat = (char *) malloc(sizeof(char) * strlen(fich_dat) + strlen(extensiondat) + 1);
+        strcpy(file_namedat, fich_dat);
+        strcat(file_namedat, extensiondat);
+    } else {
+        //Passed file has extension. All good to go :)
+        file_namedat = (char *) malloc(sizeof(char) * strlen(fich_dat) + 1);
+        strcpy(file_namedat, fich_dat);
+    }
 
     FILE *ExpBD;
-    ExpBD = fopen(fich_dat, "wb");
+    ExpBD = fopen(file_namedat, "wb");
 
     NOG *n = BD->LTabelas->Inicio;
     fwrite(BD->NOME_BDADOS, 50, 1, ExpBD);
@@ -512,13 +584,31 @@ int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
         n = n->Prox;
     }
     fclose(ExpBD);
+    free(file_namedat);
     return SUCESSO;
 }
 
-int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
+int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *file) {
 
     if (!BD) return INSUCESSO;
-    if (!fich_dat) return INSUCESSO;
+    if (!file) return INSUCESSO;
+
+    char extensiondat[5] = ".dat";
+    char *fich_dat = NULL;
+    char *have_extensiondat = strstr(file, ".dat");
+    //Handle file passed with extension or just file name
+    if (!have_extensiondat) {
+        //Passed file has no extension.We add it for you :-)
+        printf("Nao tem  extensao, adicionando por si\n");
+        fich_dat = (char *) malloc(sizeof(char) * strlen(file) + strlen(extensiondat) + 1);
+        strcpy(fich_dat, file);
+        strcat(fich_dat, extensiondat);
+    } else {
+        //Passed file has extension. All good to go :)
+        fich_dat = (char *) malloc(sizeof(char) * strlen(file) + 1);
+        strcpy(fich_dat, file);
+    }
+
 
     FILE *ExpBD;
     ExpBD = fopen(fich_dat, "rb");
@@ -574,6 +664,7 @@ int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
         }
     }
     fclose(ExpBD);
+    free(fich_dat);
     return SUCESSO;
 }
 
