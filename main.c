@@ -112,9 +112,15 @@ int main() {
     //Instanciate BD
     BDadosCoupe *BD = Criar_BDados("BD-Banco", "Versao-1.0");
 
-    //Menu
-    char buffer[50];
+    //Buffers for user input
+    char user_input_buffer1[50];
+    char user_input_buffer2[50];
+    char user_input_buffer3[50];
+    char user_input_buffer4[50];
+
+    int condicao = -1;
     TABELA *t = NULL;
+
     for (;;) {
         system("cls");
         switch (menu_principal()) {
@@ -126,8 +132,8 @@ int main() {
             case 2:
                 printf("Qual o nome da tabela que deseja criar?\n");
                 fflush(stdin);
-                scanf("%s", buffer);
-                Criar_Tabela(BD, strupr(buffer));
+                scanf("%s", user_input_buffer1);
+                Criar_Tabela(BD, strupr(user_input_buffer1));
                 system("cls");
                 Mostrar_BDados(BD);
                 break;
@@ -135,40 +141,38 @@ int main() {
                 showTableHeader(BD->LTabelas);
                 printf("Qual tabela deseja pesquisar?\n");
                 fflush(stdin);
-                scanf("%s", buffer);
-                t = Pesquisar_Tabela(BD, strupr(buffer));
+                scanf("%s", user_input_buffer1);
+                t = Pesquisar_Tabela(BD, strupr(user_input_buffer1));
                 Mostrar_Tabela(t);
                 if (!t) {
                     printf("Tabela nao encontrada!\n");
                     break;
                 }
-                t=NULL;
+                //t=NULL;
                 break;
             case 4:
                 printf("Qual o nome da tabela onde deseja adicionar campos?\n");
                 fflush(stdin);
-                scanf("%s", buffer);
-                t = Pesquisar_Tabela(BD, strupr(buffer));
+                scanf("%s", user_input_buffer1);
+                t = Pesquisar_Tabela(BD, strupr(user_input_buffer1));
                 if (!t) {
                     printf("Tabela nao encontrada!\n");
                     break;
                 }
-                char data1[50];
-                char data2[50];
                 printf("Qual o nome do campo a adicionar?\n");
                 fflush(stdin);
-                scanf("%s", data1);
+                scanf("%s", user_input_buffer1);
                 printf("Qual o tipo de dados? criar? (INT) (STRING) (FLOAT)\n");
                 fflush(stdin);
-                scanf("%s", data2);
-                Add_Campo_Tabela(t, data1, data2);
-                t=NULL;
+                scanf("%s", user_input_buffer2);
+                Add_Campo_Tabela(t, user_input_buffer1, user_input_buffer2);
+                //t=NULL;
                 break;
             case 5:
                 printf("Qual a tabela que pretende adicionar registos?\n");
                 fflush(stdin);
-                scanf("%s", buffer);
-                t = Pesquisar_Tabela(BD, strupr(buffer));
+                scanf("%s", user_input_buffer1);
+                t = Pesquisar_Tabela(BD, strupr(user_input_buffer1));
                 if (!t) {
                     printf("Tabela nao encontrada!");
                     break;
@@ -176,32 +180,31 @@ int main() {
                 Mostrar_Tabela(t);
                 printf("Indique os dados separados por ; ?\n");
                 fflush(stdin);
-                scanf("%s", buffer);
-                Add_Valores_Tabela(t, buffer);
+                scanf("%s", user_input_buffer1);
+                Add_Valores_Tabela(t, user_input_buffer1);
                 Mostrar_Tabela(t);
-                t=NULL;
+                //t=NULL;
                 break;
             case 6:
                 showTableHeader(BD->LTabelas);
                 printf("Qual a tabela que pretende?\n");
                 fflush(stdin);
-                scanf("%s", buffer);
+                scanf("%s", user_input_buffer1);
 
-                t = Pesquisar_Tabela(BD, strupr(buffer));
+                t = Pesquisar_Tabela(BD, strupr(user_input_buffer1));
                 if (!t) {
                     printf("Tabela nao encontrada!");
                     break;
                 }
                 Mostrar_Tabela(t);
-                char ncampo[50];
-                char valorcomparacao[50];
+
                 int condicao;
                 printf("Qual o Campo a filtrar?\n");
                 fflush(stdin);
-                scanf("%s", strupr(ncampo));
+                scanf("%s", strupr(user_input_buffer1));
                 printf("Qual o Valor a comparar?\n");
                 fflush(stdin);
-                scanf("%s", valorcomparacao);
+                scanf("%s", user_input_buffer2);
                 printf("Qual a condicao a aplicar?\n");
                 printf("1- Menor que ||  2- Igual a || 3- Maior que\n");
                 fflush(stdin);
@@ -209,13 +212,13 @@ int main() {
                 // Nested switch
                 switch (condicao) {
                     case 1:
-                        SELECT(BD, t->NOME_TABELA, lessThen, strupr(ncampo), valorcomparacao);
+                        SELECT(BD, t->NOME_TABELA, lessThen, strupr(user_input_buffer1), user_input_buffer2);
                         break;
                     case 2:
-                        SELECT(BD, t->NOME_TABELA, equalMatch, strupr(ncampo), valorcomparacao);
+                        SELECT(BD, t->NOME_TABELA, equalMatch, strupr(user_input_buffer1), user_input_buffer2);
                         break;
                     case 3:
-                        SELECT(BD, t->NOME_TABELA, greaterThen, strupr(ncampo), valorcomparacao);
+                        SELECT(BD, t->NOME_TABELA, greaterThen, strupr(user_input_buffer1), user_input_buffer2);
                         break;
                     default:
                         printf("Erro!\n");
@@ -226,44 +229,45 @@ int main() {
                 showTableHeader(BD->LTabelas);
                 printf("Qual a tabela que pretende?\n");
                 fflush(stdin);
-                scanf("%s", buffer);
-                t = Pesquisar_Tabela(BD, strupr(buffer));
+                scanf("%s", user_input_buffer1);
+                t = Pesquisar_Tabela(BD, strupr(user_input_buffer1));
                 if (!t) {
                     printf("Tabela nao encontrada!");
                     break;
                 }
                 Mostrar_Tabela(t);
-                char ncampoup[50];
-                char ncampoalt[50];
-                char valorcomparacaoup[50];
-                char novovalor[50];
-                int condicaoo;
+                //int condicao;
                 printf("Indique um campo do registo que pretende alterar?\n");
                 fflush(stdin);
-                scanf("%s", ncampoup);
+                scanf("%s", user_input_buffer1);
                 printf("Qual o valor do registo nesse campo?\n");
                 fflush(stdin);
-                scanf("%s", valorcomparacaoup);
+                scanf("%s", user_input_buffer3);
+
                 printf("Qual a condicao a aplicar?\n");
                 printf("1- Menor que ||  2- Igual a || 3- Maior que\n");
                 fflush(stdin);
-                scanf("%d", &condicaoo);
+                scanf("%d", &condicao);
+
                 printf("Indique que campo pretende alterar?\n");
                 fflush(stdin);
-                scanf("%s", ncampoalt);
+                scanf("%s", user_input_buffer2);
+
                 printf("Indique o novo valor do registo?\n");
                 fflush(stdin);
-                scanf("%s", novovalor);
+                scanf("%s", user_input_buffer4);
+
+                printf("%s-----",user_input_buffer2);
                 // Nested switch
-                switch (condicaoo) {
+                switch (condicao) {
                     case 1:
-                        UPDATE(BD, t->NOME_TABELA, lessThen, strupr(ncampoup), valorcomparacaoup, ncampoalt, novovalor);
+                        UPDATE(BD, t->NOME_TABELA, lessThen, strupr(user_input_buffer1), user_input_buffer3, strupr(user_input_buffer2), user_input_buffer4);
                         break;
                     case 2:
-                        UPDATE(BD, t->NOME_TABELA, equalMatch, strupr(ncampoup), valorcomparacaoup, ncampoalt, novovalor);
+                        UPDATE(BD, t->NOME_TABELA, equalMatch, strupr(user_input_buffer1), user_input_buffer3, strupr(user_input_buffer2), user_input_buffer4);
                         break;
                     case 3:
-                        UPDATE(BD, t->NOME_TABELA, greaterThen, strupr(ncampoup), valorcomparacaoup, ncampoalt, novovalor);
+                        UPDATE(BD, t->NOME_TABELA, greaterThen, strupr(user_input_buffer1), user_input_buffer3, strupr(user_input_buffer2), user_input_buffer4);
                         break;
                     default:
                         printf("Erro!\n");
@@ -274,36 +278,33 @@ int main() {
                 showTableHeader(BD->LTabelas);
                 printf("Qual a tabela que pretende?\n");
                 fflush(stdin);
-                scanf("%s", buffer);
-                t = Pesquisar_Tabela(BD, strupr(buffer));
+                scanf("%s", user_input_buffer1);
+                t = Pesquisar_Tabela(BD, strupr(user_input_buffer1));
                 if (!t) {
                     printf("Tabela nao encontrada!");
                     break;
                 }
                 Mostrar_Tabela(t);
-                char ncampodel[50];
-                char valorcomparacaodel[50];
-                int condicaooo;
                 printf("Indique um Campo para filtrar registos?\n");
                 fflush(stdin);
-                scanf("%s", ncampodel);
+                scanf("%s", user_input_buffer1);
                 printf("Qual o Valor a filtrar?\n");
                 fflush(stdin);
-                scanf("%s", valorcomparacaodel);
+                scanf("%s", user_input_buffer2);
                 printf("Qual a condicao a aplicar?\n");
                 printf("1- Menor que ||  2- Igual a || 3- Maior que\n");
                 fflush(stdin);
-                scanf("%d", &condicaooo);
+                scanf("%d", &condicao);
                 // Nested switch
-                switch (condicaooo) {
+                switch (condicao) {
                     case 1:
-                        DELETE(BD, t->NOME_TABELA, lessThen, strupr(ncampodel), valorcomparacaodel);
+                        DELETE(BD, t->NOME_TABELA, lessThen, strupr(user_input_buffer1), user_input_buffer2);
                         break;
                     case 2:
-                        DELETE(BD, t->NOME_TABELA, equalMatch, strupr(ncampodel), valorcomparacaodel);
+                        DELETE(BD, t->NOME_TABELA, equalMatch, strupr(user_input_buffer1), user_input_buffer2);
                         break;
                     case 3:
-                        DELETE(BD, t->NOME_TABELA, greaterThen, strupr(ncampodel), valorcomparacaodel);
+                        DELETE(BD, t->NOME_TABELA, greaterThen, strupr(user_input_buffer1), user_input_buffer2);
                         break;
                     default:
                         printf("Erro!\n");
@@ -318,57 +319,23 @@ int main() {
                 printf("Escolha um tipo de ficheiro\n");
                 printf("1- Exportar para fExcel || 2- Exportar para fBinario\n");
                 fflush(stdin);
-                int option;
-                scanf("%d", &option);
+               // int option;
+                scanf("%d", &condicao);
                 // Nested switch
-                switch (option) {
+                switch (condicao) {
                     case 1:
                         printf("Insira o nome do ficheiro a criar/atualizar\n");
                         fflush(stdin);
-                        char ficheir_csv[50];
-                        char extension[5] = ".csv";
-                        char *file_name = NULL;
-                        scanf("%s", ficheir_csv);
-                        char *have_extension = strstr(ficheir_csv, ".csv");
-                        //Handle file passed with extension or just file name
-                        if (!have_extension) {
-                            //Passed file has no extension.We add it for you :-)
-                            printf("Nao tem  extensao, adicionando por si\n");
-                            file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
-                            strcpy(file_name, ficheir_csv);
-                            strcat(file_name, extension);
-                        } else {
-                            //Passed file has extension. All good to go :)
-                            file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
-                            strcpy(file_name, ficheir_csv);
-                        }
-                        Exportar_BDados_Excel(BD, file_name);
-                        free(file_name);
+                        scanf("%s", user_input_buffer1);
+                        Exportar_BDados_Excel(BD, user_input_buffer1);
                         printf("Exportado com Sucesso\n");
                         break;
                     case 2:
                         printf("Insira o nome do ficheiro a criar/atualizar\n");
                         fflush(stdin);
-                        char fich_dat[50];
-                        char extensiondat[5] = ".dat";
-                        char *file_namedat = NULL;
-                        scanf("%s", fich_dat);
-                        char *have_extensiondat = strstr(fich_dat, ".dat");
-                        //Handle file passed with extension or just file name
-                        if (!have_extensiondat) {
-                            //Passed file has no extension.We add it for you :-)
-                            printf("Nao tem  extensao, adicionando por si\n");
-                            file_namedat = (char *) malloc(sizeof(char) * strlen(fich_dat) + strlen(extensiondat) + 1);
-                            strcpy(file_namedat, fich_dat);
-                            strcat(file_namedat, extensiondat);
-                        } else {
-                            //Passed file has extension. All good to go :)
-                            file_namedat = (char *) malloc(sizeof(char) * strlen(fich_dat) + 1);
-                            strcpy(file_namedat, fich_dat);
-                        }
-                        Exportar_BDados_Ficheiro_Binario(BD, file_namedat);
+                        scanf("%s", user_input_buffer1);
+                        Exportar_BDados_Ficheiro_Binario(BD, user_input_buffer1);
                         printf("Exportado com Sucesso\n");
-                        free(file_namedat);
                         break;
                     default:
                         printf("Erro!\n");
@@ -379,63 +346,29 @@ int main() {
                 printf("Escolha um tipo de ficheiro\n");
                 printf("1- Importar de fExcel || 2- Importar de fBinario\n");
                 fflush(stdin);
-                int opcaoo;
-                scanf("%d", &opcaoo);
+                scanf("%d", &condicao);
                 // Nested switch
-                switch (opcaoo) {
+                switch (condicao) {
                     case 1:
                         printf("Insira o nome do ficheiro a importar\n");
                         fflush(stdin);
-                        char ficheir_csv[50];
-                        char extension[5] = ".csv";
-                        char *file_name = NULL;
-                        scanf("%s", ficheir_csv);
-                        char *have_extension = strstr(ficheir_csv, ".csv");
-                        //Handle file passed with extension or just file name
-                        if (!have_extension) {
-                            //Passed file has no extension.We add it for you :-)
-                            printf("Nao tem  extensao, adicionando por si\n");
-                            file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + strlen(extension) + 1);
-                            strcpy(file_name, ficheir_csv);
-                            strcat(file_name, extension);
-                        } else {
-                            //Passed file has extension. All good to go :)
-                            file_name = (char *) malloc(sizeof(char) * strlen(ficheir_csv) + 1);
-                            strcpy(file_name, ficheir_csv);
+                        scanf("%s", user_input_buffer1);
+                        if(Importar_BDados_Excel(BD, user_input_buffer1)){
+                            printf("Importado com Sucesso, Mostrando BD\n");
+                            Mostrar_BDados(BD);
                         }
-                        Importar_BDados_Excel(BD, file_name);
-                        free(file_name);
-                        printf("Importado com Sucesso, Mostrando BD\n");
-                        Mostrar_BDados(BD);
+
                         break;
                     case 2:
                         printf("Insira o nome do ficheiro a importar\n");
                         fflush(stdin);
-                        char ficheir_dat[50];
-                        char extensiondat[5] = ".dat";
-                        char *fich_dat = NULL;
-                        scanf("%s", ficheir_dat);
-                        char *have_extensiondat = strstr(ficheir_dat, ".dat");
-                        //Handle file passed with extension or just file name
-                        if (!have_extensiondat) {
-                            //Passed file has no extension.We add it for you :-)
-                            printf("Nao tem  extensao, adicionando por si\n");
-                            fich_dat = (char *) malloc(sizeof(char) * strlen(ficheir_dat) + strlen(extensiondat) + 1);
-                            strcpy(fich_dat, ficheir_dat);
-                            strcat(fich_dat, extensiondat);
-                        } else {
-                            //Passed file has extension. All good to go :)
-                            fich_dat = (char *) malloc(sizeof(char) * strlen(ficheir_dat) + 1);
-                            strcpy(fich_dat, ficheir_dat);
-                        }
-                        printf("fichdat: %s", fich_dat);
-                        Importar_BDados_Ficheiro_Binario(BD, fich_dat);
-                        free(fich_dat);
+                        scanf("%s", user_input_buffer1);
+                        Importar_BDados_Ficheiro_Binario(BD, user_input_buffer1);
                         printf("Importado com Sucesso, Mostrando BD\n");
                         Mostrar_BDados(BD);
                         break;
                     default:
-                        printf("Errowo\n");
+                        printf("Erro\n");
                         break;
                 }
                 break;
@@ -443,32 +376,12 @@ int main() {
                 showTableHeader(BD->LTabelas);
                 printf("Escolha a tabela que pretende exportar\n");
                 fflush(stdin);
-                char buffer[50];
-                char buffer2[50];
-                scanf("%s", &buffer);
+
+                scanf("%s", user_input_buffer1);
                 fflush(stdin);
                 printf("Qual o nome do ficheiro a exportar?\n");
-                scanf("%s", &buffer2);
-
-                char extension[5] = ".csv";
-                char *file_name = NULL;
-
-                char *have_extension = strstr(buffer2, ".csv");
-                //Handle file passed with extension or just file name
-                if (!have_extension) {
-                    //Passed file has no extension.We add it for you :-)
-                    printf("Nao tem  extensao, adicionando por si\n");
-                    file_name = (char *) malloc(sizeof(char) * strlen(buffer2) + strlen(extension) + 1);
-                    strcpy(file_name, buffer2);
-                    strcat(file_name, extension);
-                } else {
-                    //Passed file has extension. All good to go :)
-                    file_name = (char *) malloc(sizeof(char) * strlen(buffer2) + 1);
-                    strcpy(file_name, buffer2);
-                }
-                Exportar_Tabela_BDados_Excel(BD, strupr(buffer), file_name);
-                free(file_name);
-
+                scanf("%s", user_input_buffer2);
+                Exportar_Tabela_BDados_Excel(BD, strupr(user_input_buffer1), user_input_buffer2);
 
                 break;
             case 0:
@@ -477,6 +390,7 @@ int main() {
                 break;
         } // END switch (menu_principal())
         system("pause");
+        fflush(stdin);
     }
 }
 
