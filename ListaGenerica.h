@@ -14,6 +14,7 @@ typedef struct NOG {
 
 typedef struct {
     NOG *Inicio;
+    NOG *Fim;
     int NEL;
 }  ListaGenerica;
 

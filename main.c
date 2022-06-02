@@ -592,7 +592,7 @@ int main() {
     //Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
     //UPDATE(BD,"CLIENTES",equalMatch,"ID","2","NOME","AndreFilipe");
     Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
-    DELETE(BD,"CLIENTES",equalMatch,"ID","4");
+    DELETE(BD,"CLIENTES",greaterThen,"ID","3");
     Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));
    // Mostrar_BDados(BD);
 //    Mostrar_Tabela(Pesquisar_Tabela(BD,"CLIENTES"));

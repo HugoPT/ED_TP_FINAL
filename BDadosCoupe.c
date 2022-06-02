@@ -1033,7 +1033,6 @@ void printResultNode(NOG *node) {
         p = p->Prox;
     }
     printf("\n");
-    //printf("+------------------------------+\n");
 }
 
 void showHeaderTable(NOG *node, char *title) {
@@ -1139,19 +1138,14 @@ SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *
 
 NOG *removeRegister(ListaGenerica *l, NOG *element) {
     if (!l)return NULL;
-    int procura = 1;
-    NOG *ret, *ant, *actual;
-    ant = actual = l->Inicio;
-    while (procura) {
-        if (actual == NULL)procura = 0;
-        else if (actual == element)
-            procura = 0;
-        else {
-            ant = actual;
-            actual = actual->Prox;
-        }
-        if (actual != NULL) {
-            ret = actual;
+    if (!element)return NULL;
+
+    NOG *previous, *actual;
+//    //Find the node to be removed
+    actual = l->Inicio;
+    while (actual) {
+        if (actual == element) {
+            //printf("Vou remover este no %s",(REGISTO*)(element->Info);
             if (l->Inicio == actual) {
                 DestruirLG(actual->Info, destroy_info_string);
                 l->NEL--;
@@ -1159,14 +1153,45 @@ NOG *removeRegister(ListaGenerica *l, NOG *element) {
             } else {
                 DestruirLG(actual->Info, destroy_info_string);
                 l->NEL--;
-                ant->Prox = actual->Prox;
+                previous->Prox = actual->Prox;
             }
-        } else {
-            ret = NULL;
         }
-        return ret;
+        previous = actual;
+        actual = actual->Prox;
     }
 
+
+//    int procura = 1;
+//
+//    NOG *ret, *ant, *actual;
+//    ant = actual = l->Inicio;
+//
+//
+//
+//    while (procura) {
+//        if (actual == NULL)procura = 0;
+//        else if (actual == element)
+//            procura = 0;
+//        else {
+//            ant = actual;
+//            actual = actual->Prox;
+//        }
+//        if (actual != NULL) {
+//            ret = actual;
+//            if (l->Inicio == actual) {
+//                DestruirLG(actual->Info, destroy_info_string);
+//                l->NEL--;
+//                l->Inicio = actual->Prox;
+//            } else {
+//                DestruirLG(actual->Info, destroy_info_string);
+//                l->NEL--;
+//                ant->Prox = actual->Prox;
+//            }
+//        } else {
+//            ret = NULL;
+//        }
+//        return ret;
+//    }
     return NULL;
 }
 
@@ -1215,12 +1240,10 @@ DELETE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *
             //NOG*aux  = NULL;
             while (p) {
                 if (field_pos == pos) {
-                    printf("Comparing %s with %s\n", (char *) p->Info, valor_comparacao);
                     if (f_condicao((char *) p->Info, valor_comparacao)) {
-                        //printf("---Vamos remover %s",p->Info);
                         printResultNode(node);
-                        removeRegister(table->LRegistos,p);
-                        //printResultNode(removeRegister(table->LRegistos, p));
+                        removeRegister(table->LRegistos, node);
+                        register_count++;
                     }
                 }
                 pos++;
@@ -1228,8 +1251,8 @@ DELETE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *
             }
             node = node->Prox;
         }
-        printf("+------------------------------+\n");
-        printf("Foram encontrados %d registos\n", register_count);
+        printf("+------------------------------------------+\n");
+        printf("Foram encontrado(s) %d registos\n\n\n", register_count);
 
     }
     end = clock();

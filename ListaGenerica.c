@@ -13,11 +13,10 @@ void DestruirLG(ListaGenerica *L, void (*func)(void *)) {
     if (!func) return;
     NOG *node = L->Inicio;
     NOG *Aux = NULL;
-    while (node)
-    {
+    while (node) {
         Aux = node->Prox;
-        if (func !=NULL) func (node->Info);
-        free (node);
+        if (func != NULL) func(node->Info);
+        free(node);
         node = Aux;
     }
     free(L);
@@ -39,6 +38,7 @@ int AddLG(ListaGenerica *L, void *X) {
         node->Info = X;
         L->Inicio = node;
         L->NEL++;
+        L->Fim = L->Inicio->Prox;
     } else {
         //Add the Node to the end
         NOG *node = L->Inicio;
@@ -46,10 +46,13 @@ int AddLG(ListaGenerica *L, void *X) {
         while (node->Prox) {
             node = node->Prox;
         }
+        //Create the next Node
         NOG *next = (NOG *) malloc(sizeof(NOG));
         next->Prox = NULL;
         next->Info = X;
+
         node->Prox = next;
+
         L->NEL++;
     }
     return SUCESSO;
