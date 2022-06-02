@@ -38,7 +38,7 @@ int AddLG(ListaGenerica *L, void *X) {
         node->Info = X;
         L->Inicio = node;
         L->NEL++;
-        L->Fim = L->Inicio->Prox;
+        L->Fim = L->Inicio;
     } else {
         //Add the Node to the end
         NOG *node = L->Inicio;
@@ -50,9 +50,7 @@ int AddLG(ListaGenerica *L, void *X) {
         NOG *next = (NOG *) malloc(sizeof(NOG));
         next->Prox = NULL;
         next->Info = X;
-
         node->Prox = next;
-
         L->NEL++;
     }
     return SUCESSO;
@@ -63,7 +61,5 @@ void MostrarLG(ListaGenerica *L, void (*fshow)(void *)) {
         printf("%s", "List vazia\n");
         return;
     }
-    //Passamos a lista para a funcao para tambem se conseguir ler o Nel da mesma.Util para desenhar a tabela
     fshow(L);
-
 }
