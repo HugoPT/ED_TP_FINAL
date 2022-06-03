@@ -426,13 +426,14 @@ int Exportar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     free(file_name);
     return INSUCESSO;
 }
+
 /**
  * \brief Function to store execution performance statistics and log.Saves the statistics in \n statistics.csv
  * @param FunctionName :Name of the function to cron
  * @param start :Start timestampo
  * @param end :End timestamp
  */
-void Time(const char *FunctionName, clock_t start, clock_t end) {
+void createStatistics(const char *FunctionName, clock_t start, clock_t end) {
     FILE *Time;
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
@@ -443,7 +444,7 @@ void Time(const char *FunctionName, clock_t start, clock_t end) {
     fclose(Time);
 }
 
-
+//private function for filter ;
 char *scan(char **pp, char c) {
     char *s = *pp, *p;
     p = strchr(*pp, c);
@@ -451,8 +452,10 @@ char *scan(char **pp, char c) {
     *pp = p;
     return s;
 }
+
 //Typedef alias to string
 typedef char *string;
+
 /**
  * \brief Split a string with a ;
  * @param inputString :String yo split
@@ -473,7 +476,12 @@ string *splitString(const char *inputString) {
     return container;
 }
 
-
+/**
+ * \brief Allows the user to import a CSV file to restore de BD
+ * @param BD : Pointer to BD
+ * @param ficheir_csv : File CSV with the exported data
+ * @return SUCESSO or INSUCESSO for the state of the import
+ */
 int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
     if (!BD) return INSUCESSO;
     if (!ficheir_csv) return INSUCESSO;
@@ -482,7 +490,6 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
 
     char extension[5] = ".csv";
     char *file_name = NULL;
-    scanf("%s", ficheir_csv);
     char *have_extension = strstr(ficheir_csv, ".csv");
     //Handle file passed with extension or just file name
     if (!have_extension) {
@@ -554,16 +561,15 @@ int Importar_BDados_Excel(BDadosCoupe *BD, char *ficheir_csv) {
 
 /**
  *
- *
+ *\brief Export the database for a binary file
  * @param BD - Datgabase name to use
  * @param fich_dat File name to write binary
- * @return  Sucess or fail
+ * @return SUCESSO or INSUCESSO for the state of the export
  */
 int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     if (!BD) return -1;
     if (!fich_dat) return -1;
 
-    //int i = 0;
     char extensiondat[5] = ".dat";
     char *file_namedat = NULL;
     char *have_extensiondat = strstr(fich_dat, ".dat");
@@ -619,6 +625,12 @@ int Exportar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *fich_dat) {
     return SUCESSO;
 }
 
+/**
+ * \brief Import a binary file to restore the BD
+ * @param BD : Pointer to BD
+ * @param file :File to be loades
+ * @return SUCESSO or INSUCESSO for the state of the import
+ */
 int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *file) {
 
     if (!BD) return INSUCESSO;
@@ -639,7 +651,6 @@ int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *file) {
         fich_dat = (char *) malloc(sizeof(char) * strlen(file) + 1);
         strcpy(fich_dat, file);
     }
-
 
     FILE *ExpBD;
     ExpBD = fopen(fich_dat, "rb");
@@ -668,30 +679,23 @@ int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *file) {
             CAMPO C;
             fread(&C, sizeof(CAMPO), 1, ExpBD);
             Add_Campo_Tabela(nomeTb, C.NOME_CAMPO, C.TIPO);
-            printf("Li tamanho campos - %s : %s\n", C.NOME_CAMPO, C.TIPO);
         }
         fread(&nRegistos, sizeof(int), 1, ExpBD);
         contaT = nRegistos * nCampos;
         int Pos = 0;
-
+//Init empty
         char BUFFER[100] = "";
-
         for (int int_r = 0; int_r < contaT; int_r++) {
             Pos++;
             fread(&nCharReg, sizeof(int), 1, ExpBD);
             fread(LerRegistos, sizeof(char), nCharReg, ExpBD);
-
-            /////////////////////////////////////////////////////////////////////////
             strcat(BUFFER, LerRegistos);
             strcat(BUFFER, ";");
-            printf("%s\n", BUFFER);
             if (Pos == nCampos) {
                 Add_Valores_Tabela(nomeTb, BUFFER);
-                printf("%s\n", BUFFER);
                 Pos = 0;
                 strcpy(BUFFER, "");
             }
-            /////////////////////////////////////////////////////////////////////////
         }
     }
     fclose(ExpBD);
@@ -699,6 +703,7 @@ int Importar_BDados_Ficheiro_Binario(BDadosCoupe *BD, char *file) {
     return SUCESSO;
 }
 
+//Private function for dealoc a string and safe it to NULL
 void destroy_info_string(void *info) {
     //this info is a string pointer
     free(info);
@@ -706,12 +711,15 @@ void destroy_info_string(void *info) {
     info = NULL;
 
 }
-
+//private function for pass in function
 void destroy_info(void *info) {
     printf("Info is already free\n");
 }
-
-//L)	Apagar o conteúdo de uma Tabela. A Tabela continua a existir na BDados, mas não contém os dados, ou seja, os campos continuam, mas os registos são eliminados.
+/**
+ * \brief Delete the data inside the table.Does not remove table
+ * @param T :table to empty
+ * @return SUCESSO or INSUCESSO for empty result
+ */
 int DELETE_TABLE_DATA(TABELA *T) {
     if (!T)return INSUCESSO;
     NOG *registerListNode = T->LRegistos->Inicio;
@@ -729,6 +737,11 @@ int DELETE_TABLE_DATA(TABELA *T) {
     return SUCESSO;
 }
 
+/**
+ * \brief Delete the data field\n Warning
+ * @param T :table to empty
+ * @return SUCESSO or INSUCESSO for empty result
+ */
 int DELETE_TABLE_FIELDS(TABELA *T) {
     if (!T)return INSUCESSO;
     if (T->LCampos->NEL > 0) {
@@ -745,50 +758,47 @@ int DELETE_TABLE_FIELDS(TABELA *T) {
     return INSUCESSO;
 }
 
-//M)	Apagar o conteúdo de uma Tabela e remove a tabela da base de dados.
+/**
+ * \brief Clear the content of the table and drop it.
+ * @param BD :Pointer to BD
+ * @param nome_tabela :Name of the table to drop
+ * @return SUCESSO or INSUCESSO for empty result
+ */
 int DROP_TABLE(BDadosCoupe *BD, char *nome_tabela) {
     if (!BD)return INSUCESSO;
     if (strlen(nome_tabela) < 1)return INSUCESSO;
     TABELA *t = Pesquisar_Tabela(BD, nome_tabela);
     if (t) {
-        //printf("Droping table %s\n", t->NOME_TABELA);
         NOG *P = BD->LTabelas->Inicio;
         NOG *Ant = NULL;
         int STOP = 0;
         while (P && !STOP) {
-            if (P->Info == t) // if (func(P->Info, cc) == 1)
+            if (P->Info == t)
             {
-                // Vou ter de remover o P
                 STOP = 1;
             } else {
                 Ant = P;
                 P = P->Prox;
             }
         }
-        // Agora ou encontrei ou n?o
         if (STOP == 1) {
-            // Remover o que est? no P
             if (Ant)
                 Ant->Prox = P->Prox;
-            else // Caso do inicio
+            else
                 BD->LTabelas->Inicio = P->Prox;
-
             DELETE_TABLE_DATA(t);
             DELETE_TABLE_FIELDS(t);
             free(P->Info);
             free(P);
             BD->LTabelas->NEL--;
             return SUCESSO;
-
         }
-        return INSUCESSO;
-
-
         return SUCESSO;
     }
     return INSUCESSO;
 }
 
+//private function for print the content formated
 void printResultNode(NOG *node) {
 //Iterate all the nodes and print the info
     NOG *p = ((REGISTO *) (node->Info))->Inicio;
@@ -798,7 +808,7 @@ void printResultNode(NOG *node) {
     }
     printf("\n");
 }
-
+//private function for print the table header
 void showHeaderTable(NOG *node, char *title) {
     printf("+------------------ %s  QUERY---------------+\n", title);
     NOG *n = node;
@@ -810,7 +820,15 @@ void showHeaderTable(NOG *node, char *title) {
     printf("\n");
 }
 
-//N)	Selecionar (Apresentar no ecran!) da base de dados todos os registos que obedeçam a uma dada condição, a função deve retornar o número de registos selecionados. (Ter em atenção o exemplo das aulas teóricas!). Nota: esta é certamente a funcionalidade mais usada num sistema de base de dados…, por isso se estiver bem otimizada…. O utilizador agradece!!!!
+/**
+ * \brief Performs a select in a table with options
+ * @param BD : Pointer to BD
+ * @param _tabela :Name of the table to perform the select
+ * @param f_condicao : User closure to run the filter
+ * @param nome_campo : Name of the field to match
+ * @param valor_comparacao : Value to compare
+ * @return Prints the result to the user with affected rows
+ */
 int
 SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *nome_campo, char *valor_comparacao) {
 
@@ -871,14 +889,20 @@ SELECT(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *
     }
 
     end = clock();
-    Time(__FUNCTION__, start, end);
+    createStatistics(__FUNCTION__, start, end);
     return SUCESSO;
 }
 
 
-NOG *removeRegister(ListaGenerica *l, NOG *element) {
-    if (!l)return NULL;
-    if (!element)return NULL;
+/**
+ * \brief Removes a REGISTER node from a linked List
+ * @param l :List
+ * @param element : Node element to remove
+ * @return
+ */
+void removeRegister(ListaGenerica *l, NOG *element) {
+    if (!l)return ;
+    if (!element)return ;
 
     NOG *previous, *actual;
 //    //Find the node to be removed
@@ -899,14 +923,20 @@ NOG *removeRegister(ListaGenerica *l, NOG *element) {
         actual = actual->Prox;
     }
 
-
-    return NULL;
 }
 
-//O)	Remover todos os registos que obedeçam a uma dada condição, a função deve retornar o número de registos removidos.
+/**
+ *
+ * @param BD : Pointer to BD
+ * @param _tabela :Table to perfom the delete
+ * @param f_condicao : User closure for filter
+ * @param nome_campo : Name to the field
+ * @param valor_comparacao :Value to compare
+ * @return
+ */
 int
 DELETE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *nome_campo, char *valor_comparacao) {
-    //Time metrics
+    //createStatistics metrics
     clock_t start, end;
     start = clock();
 
@@ -941,6 +971,7 @@ DELETE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *
         int register_count = 0;
         //Pointer to the REGISTOS List
         NOG *node = table->LRegistos->Inicio;
+        int found = 0;
         while (node) {
             NOG *p = ((REGISTO *) (node->Info))->Inicio;
             int pos = 0;
@@ -948,12 +979,16 @@ DELETE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *
                 if (field_pos == pos) {
                     if (f_condicao((char *) p->Info, valor_comparacao)) {
                         printResultNode(node);
-                        removeRegister(table->LRegistos, node);
+                        found = 1;
                         register_count++;
                     }
                 }
                 pos++;
                 p = p->Prox;
+            }
+            if (found) {
+                removeRegister(table->LRegistos, node);
+                found = 0;
             }
             node = node->Prox;
         }
@@ -962,29 +997,45 @@ DELETE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *
 
     }
     end = clock();
-    Time(__FUNCTION__, start, end);
+    createStatistics(__FUNCTION__, start, end);
     return SUCESSO;
 }
 
+/**
+ * \brief Update a REGISTER node with a new value based on the field_position
+ * @param r : Register node to uptade
+ * @param field_pos : Field position to update
+ * @param newValue : Value to update
+ */
 void updateREGISTER(NOG *r, int field_pos, char *newValue) {
     if (!r)return;
     if (!newValue)return;
     int pos = 0;
-    while (r) {
-        if (field_pos = pos) {
-            free(r->Info);
-            r->Info = (char *) malloc(sizeof(char) * strlen(newValue) + 1);
-            strcpy(r->Info, newValue);
+
+    NOG *p = ((REGISTO *) (r->Info))->Inicio;
+    while (p) {
+        if (field_pos == pos) {
+            free(p->Info);
+            p->Info = (char *) malloc(sizeof(char) * strlen(newValue) + 1);
+            strcpy(p->Info, newValue);
             return;
         }
         pos++;
-        r = r->Prox;
+        p = p->Prox;
     }
-
-
 }
 
-//P)	Atualizar todos os registos da tabela onde o Campo é dado, que obedeçam a uma dada condição, a função deve retornar o número de registos que foram atualizados.
+/**
+ * \brief Perform a SQL UPDATE to the BD with somo options
+ * @param BD : Pointer to bD
+ * @param _tabela : Name of the table to perfomr the query
+ * @param f_condicao : User closure to filter
+ * @param campo_comp : Name of the field
+ * @param valor_campo_comp : Value of the field
+ * @param nome_campo_update : Name of field to update
+ * @param valor_campo_update : Value to update
+ * @return
+ */
 int UPDATE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), char *campo_comp, char *valor_campo_comp,
            char *nome_campo_update, char *valor_campo_update) {
 
@@ -1003,7 +1054,7 @@ int UPDATE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
         NOG *field = table->LCampos->Inicio;
         int i = 0;
         int field_found = 0;
-        int field_pos;
+        int field_pos = 0;
         while (field) {
             if (strcmp((char *) field->Info, campo_comp) == 0) {
                 field_found = 1;
@@ -1013,7 +1064,6 @@ int UPDATE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
             i++;
             field = field->Prox;
         }
-
         //Check if the nome_campo_update exists
         i = 0;
         field_found = 0;
@@ -1033,7 +1083,8 @@ int UPDATE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
             printf("\tNao foram encontrados registos com esse nome de campo!!!\n");
             return INSUCESSO;
         }
-        printf("Campo no indice %d\n\n", field_pos);
+        printf("Campo aprocurar no indice %d\n\n", field_pos);
+        printf("Campo a atualizar no indice %d\n\n", field_update_pos);
 
         showHeaderTable(table->LCampos->Inicio, "UPDATE");
         int register_count = 0;
@@ -1045,7 +1096,7 @@ int UPDATE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
             while (p) {
                 if (field_pos == pos) {
                     if (f_condicao((char *) p->Info, valor_campo_comp)) {
-                        updateREGISTER(p, field_update_pos, valor_campo_update);
+                        updateREGISTER(node, field_update_pos, valor_campo_update);
                         register_count++;
                         printResultNode(node);
                     }
@@ -1056,13 +1107,13 @@ int UPDATE(BDadosCoupe *BD, char *_tabela, int (*f_condicao)(char *, char *), ch
             node = node->Prox;
         }
         printf("+------------------------------+\n");
-        printf("Foram encontrados %d registos\n", register_count);
+        printf("Foram encontrado(s) %d registo(s)\n", register_count);
 
     } else {
         printf("Tabela nao encontrada!!!\n");
     }
     end = clock();
-    Time(__FUNCTION__, start, end);
+    createStatistics(__FUNCTION__, start, end);
     return SUCESSO;
 }
 

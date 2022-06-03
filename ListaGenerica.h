@@ -14,6 +14,7 @@ typedef struct NOG {
 
 typedef struct {
     NOG *Inicio;
+    //To improve performance implement Fim for fast inserts
     NOG *Fim;
     int NEL;
 }  ListaGenerica;

@@ -1,0 +1,11 @@
+var searchData=
+[
+  ['delete_0',['DELETE',['../_b_dados_coupe_8c.html#a9ed29fa9f315cd06f166a0dce6e89a95',1,'DELETE(BDadosCoupe *BD, char *_tabela, int(*f_condicao)(char *, char *), char *nome_campo, char *valor_comparacao):&#160;BDadosCoupe.c'],['../_b_dados_coupe_8h.html#a9ed29fa9f315cd06f166a0dce6e89a95',1,'DELETE(BDadosCoupe *BD, char *_tabela, int(*f_condicao)(char *, char *), char *nome_campo, char *valor_comparacao):&#160;BDadosCoupe.c']]],
+  ['delete_5ftable_5fdata_1',['DELETE_TABLE_DATA',['../_b_dados_coupe_8c.html#aeae24f00eb1ac1790319c59dd4edefd0',1,'DELETE_TABLE_DATA(TABELA *T):&#160;BDadosCoupe.c'],['../_b_dados_coupe_8h.html#aeae24f00eb1ac1790319c59dd4edefd0',1,'DELETE_TABLE_DATA(TABELA *T):&#160;BDadosCoupe.c']]],
+  ['delete_5ftable_5ffields_2',['DELETE_TABLE_FIELDS',['../_b_dados_coupe_8c.html#af407a3c5330cbc1f2e449453f1416dcc',1,'DELETE_TABLE_FIELDS(TABELA *T):&#160;BDadosCoupe.c'],['../_b_dados_coupe_8h.html#af407a3c5330cbc1f2e449453f1416dcc',1,'DELETE_TABLE_FIELDS(TABELA *T):&#160;BDadosCoupe.c']]],
+  ['destroy_5finfo_3',['destroy_info',['../_b_dados_coupe_8c.html#a9dfbf5f4ef15ac025a22a35c050f9da1',1,'BDadosCoupe.c']]],
+  ['destroy_5finfo_5fstring_4',['destroy_info_string',['../_b_dados_coupe_8c.html#a33d26fb59bc11ac964ea431395ff689c',1,'BDadosCoupe.c']]],
+  ['destruir_5fbdados_5',['Destruir_BDados',['../_b_dados_coupe_8c.html#a0720ec19a16da2a45ca83eedff97c367',1,'Destruir_BDados(BDadosCoupe *BD):&#160;BDadosCoupe.c'],['../_b_dados_coupe_8h.html#a0720ec19a16da2a45ca83eedff97c367',1,'Destruir_BDados(BDadosCoupe *BD):&#160;BDadosCoupe.c']]],
+  ['destruirlg_6',['DestruirLG',['../_lista_generica_8c.html#a7340ee8d3e1fd792936ce98e0d753cf7',1,'DestruirLG(ListaGenerica *L, void(*func)(void *)):&#160;ListaGenerica.c'],['../_lista_generica_8h.html#a7340ee8d3e1fd792936ce98e0d753cf7',1,'DestruirLG(ListaGenerica *L, void(*func)(void *)):&#160;ListaGenerica.c']]],
+  ['drop_5ftable_7',['DROP_TABLE',['../_b_dados_coupe_8c.html#a621f9f6bcf497bec1ba4a80f599b15b2',1,'DROP_TABLE(BDadosCoupe *BD, char *nome_tabela):&#160;BDadosCoupe.c'],['../_b_dados_coupe_8h.html#a621f9f6bcf497bec1ba4a80f599b15b2',1,'DROP_TABLE(BDadosCoupe *BD, char *nome_tabela):&#160;BDadosCoupe.c']]]
+];
